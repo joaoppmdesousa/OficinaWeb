@@ -6,13 +6,23 @@ namespace OficinaWeb.Data.Entities
     {
         public int Id { get; set; }
 
+        [Required]
+        [MaxLength(50)]
         public string Name { get; set; }
 
-        public int Contact { get; set; }
+        [Required]
+        [Phone]
+        [RegularExpression(@"^\+?[0-9]{7,15}$", ErrorMessage = "Enter a valid phone number.")]
+        public string Contact { get; set; }
 
-        [Display(Name="Tax Number")]
-        public int TaxNumber { get; set; }
+        [Required]
+        [Display(Name = "Tax Number")]
+        [RegularExpression(@"^[0-9]{9,15}$", ErrorMessage = "Tax number must be between 9 and 15 digits.")]
+        public string TaxNumber { get; set; }
 
+        [Required]
+        [MaxLength(50)]
+        [EmailAddress]
         public string Email { get; set; }
 
 
