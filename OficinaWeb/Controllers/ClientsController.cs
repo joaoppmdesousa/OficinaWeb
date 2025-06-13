@@ -12,17 +12,17 @@ namespace OficinaWeb.Controllers
 {
     public class ClientsController : Controller
     {
-        private readonly IRepository _repository;
+        private readonly IClientRepository _clientRepository;
 
-        public ClientsController(IRepository repository)
+        public ClientsController(IClientRepository clientRepository)
         {
-            _repository = repository;
+            _clientRepository = clientRepository;
         }
 
         // GET: Clients
         public IActionResult Index()
         {
-            return View(_repository.GetClients());
+            return View(_clientRepository.GetAll());
         }
 
         // GET: Clients/Details/5
@@ -33,7 +33,7 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var client = _repository.GetClient(id.Value);
+            var client = await _clientRepository.GetIdAsync(id.Value);
             if (client == null)
             {
                 return NotFound();
@@ -57,22 +57,21 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _repository.AddClient(client);
-                await _repository.SaveAllAsync();
+                await _clientRepository.CreateAsync(client);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
         }
 
         // GET: Clients/Edit/5
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var client = _repository.GetClient(id.Value);
+            var client = await _clientRepository.GetIdAsync(id.Value);
             if (client == null)
             {
                 return NotFound();
@@ -96,12 +95,11 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                    _repository.UpdateClient(client);
-                    await _repository.SaveAllAsync();
+                   await _clientRepository.UpdateAsync(client);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_repository.ClientExists(client.Id))
+                    if (! await _clientRepository.ExistsAsync(client.Id))
                     {
                         return NotFound();
                     }
@@ -116,14 +114,14 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: Clients/Delete/5
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var client = _repository.GetClient(id.Value);
+            var client = await _clientRepository.GetIdAsync(id.Value);
             if (client == null)
             {
                 return NotFound();
@@ -137,9 +135,8 @@ namespace OficinaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var client = _repository.GetClient(id);
-            _repository.RemoveClient(client);
-            await _repository.SaveAllAsync();
+            var client = await _clientRepository.GetIdAsync(id);
+            await _clientRepository.DeleteAsync(client);
             return RedirectToAction(nameof(Index));
         }
  

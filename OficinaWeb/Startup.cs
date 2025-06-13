@@ -28,7 +28,7 @@ namespace OficinaWeb
             services.AddDbContext<DataContext>(cfg =>
                 cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddScoped<IRepository, Repository>();
+            services.AddScoped<IClientRepository, ClientRepository>();
 
             services.AddControllersWithViews();
         }
