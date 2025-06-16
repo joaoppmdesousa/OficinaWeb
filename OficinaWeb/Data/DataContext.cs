@@ -8,6 +8,8 @@ namespace OficinaWeb.Data
 
         public DbSet<Client> Clients { get; set; }
 
+        public DbSet<Vehicle> Vehicles { get; set; }
+
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {                
         }

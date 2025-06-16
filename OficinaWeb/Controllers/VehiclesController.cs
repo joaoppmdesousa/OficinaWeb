@@ -7,25 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Models;
 
 namespace OficinaWeb.Controllers
 {
-    public class ClientsController : Controller
+    public class VehiclesController : Controller
     {
-        private readonly IClientRepository _clientRepository;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public ClientsController(IClientRepository clientRepository)
+        public VehiclesController(IVehicleRepository vehicleRepository)
         {
-            _clientRepository = clientRepository;
+            _vehicleRepository = vehicleRepository;
         }
 
-        // GET: Clients
-        public IActionResult Index()
+        // GET: Vehicles
+        public async Task<IActionResult> Index()
         {
-            return View(_clientRepository.GetAll().OrderBy(c => c.Name));
+            return View(_vehicleRepository.GetAll().OrderBy(c => c.Model));
         }
 
-        // GET: Clients/Details/5
+        // GET: Vehicles/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,37 +34,46 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var client = await _clientRepository.GetIdAsync(id.Value);
-            if (client == null)
+            var vehicle = await _vehicleRepository.GetIdAsync(id.Value);
+            if (vehicle == null)
             {
                 return NotFound();
             }
 
-            return View(client);
+            return View(vehicle);
         }
 
-        // GET: Clients/Create
+        // GET: Vehicles/Create
         public IActionResult Create()
         {
-            return View();
+            var model = new VehicleViewModel         
+            {
+                Clients = _vehicleRepository.GetComboClients()
+            };
+
+            return View(model);
         }
 
-        // POST: Clients/Create
+        // POST: Vehicles/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Contact,TaxNumber,Email")] Client client)
+        public async Task<IActionResult> Create(VehicleViewModel model)
         {
+
             if (ModelState.IsValid)
             {
-                await _clientRepository.CreateAsync(client);
+                var vehicle = model.ToVehicle();
+                await _vehicleRepository.CreateAsync(vehicle);
                 return RedirectToAction(nameof(Index));
-            }
-            return View(client);
+            }          
+
+            model.Clients = _vehicleRepository.GetComboClients();
+            return View(model);
         }
 
-        // GET: Clients/Edit/5
+        // GET: Vehicles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -71,22 +81,22 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var client = await _clientRepository.GetIdAsync(id.Value);
-            if (client == null)
+            var vehicle = await _vehicleRepository.GetIdAsync(id.Value);
+            if (vehicle == null)
             {
                 return NotFound();
             }
-            return View(client);
+            return View(vehicle);
         }
 
-        // POST: Clients/Edit/5
+        // POST: Vehicles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Contact,TaxNumber,Email")] Client client)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,LicensePlate,Brand,Model,Year,Mileage,FuelType,ClientId")] Vehicle vehicle)
         {
-            if (id != client.Id)
+            if (id != vehicle.Id)
             {
                 return NotFound();
             }
@@ -95,11 +105,11 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                   await _clientRepository.UpdateAsync(client);
+                    await _vehicleRepository.UpdateAsync(vehicle);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (! await _clientRepository.ExistsAsync(client.Id))
+                    if (!await _vehicleRepository.ExistsAsync(vehicle.Id))
                     {
                         return NotFound();
                     }
@@ -110,10 +120,10 @@ namespace OficinaWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(client);
+            return View(vehicle);
         }
 
-        // GET: Clients/Delete/5
+        // GET: Vehicles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -121,24 +131,24 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var client = await _clientRepository.GetIdAsync(id.Value);
-            if (client == null)
+            var vehicle = await _vehicleRepository.GetIdAsync(id.Value);
+            if (vehicle == null)
             {
                 return NotFound();
             }
 
-            return View(client);
+            return View(vehicle);
         }
 
-        // POST: Clients/Delete/5
+        // POST: Vehicles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var client = await _clientRepository.GetIdAsync(id);
-            await _clientRepository.DeleteAsync(client);
+            var vehicle = await _vehicleRepository.GetIdAsync(id);
+            await _vehicleRepository.DeleteAsync(vehicle);
             return RedirectToAction(nameof(Index));
         }
- 
+       
     }
 }

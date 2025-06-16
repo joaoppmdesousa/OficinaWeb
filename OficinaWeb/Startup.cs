@@ -29,6 +29,8 @@ namespace OficinaWeb
                 cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IClientRepository, ClientRepository>();
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+
 
             services.AddControllersWithViews();
         }
