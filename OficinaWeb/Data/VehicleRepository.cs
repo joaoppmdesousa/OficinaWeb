@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace OficinaWeb.Data
 {
@@ -14,22 +16,11 @@ namespace OficinaWeb.Data
             _context = context;
         }
 
-        public IEnumerable<SelectListItem> GetComboClients()
+        public Task<Client> GetClientAsync(int clientId)
         {
-            var list = _context.Clients.Select(p => new SelectListItem
-            {
-                Text = p.Name,
-                Value = p.Id.ToString()
-            }).ToList();
-
-            list.Insert(0, new SelectListItem
-            {
-                Text = "(Select a client...)",
-                Value = "0"
-            });
-
-            return list;
+           return _context.Clients
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == clientId);
         }
-
     }
 }

@@ -21,9 +21,27 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: Vehicles
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int ? clientId)
         {
-            return View(_vehicleRepository.GetAll().OrderBy(c => c.Model));
+            if (clientId == null)
+            {
+                return NotFound(); 
+            }
+
+            var client = await _vehicleRepository.GetClientAsync(clientId.Value);
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.ClientName = client.Name;
+            ViewBag.ClientId = client.Id;
+            var vehicles = _vehicleRepository
+           .GetAll()
+           .Where(v => v.ClientId == clientId.Value)
+           .OrderBy(v => v.Model);
+
+            return View(vehicles);
         }
 
         // GET: Vehicles/Details/5
@@ -44,14 +62,27 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: Vehicles/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? clientId)
         {
-            var model = new VehicleViewModel         
+            if(clientId == null)
             {
-                Clients = _vehicleRepository.GetComboClients()
+                return NotFound();
+            }
+
+            var client = await _vehicleRepository.GetClientAsync(clientId.Value);
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.ClientId = client.Id;
+
+            var vehicle = new Vehicle
+            {
+                ClientId = clientId.Value
             };
 
-            return View(model);
+            return View(vehicle);
         }
 
         // POST: Vehicles/Create
@@ -59,18 +90,16 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(VehicleViewModel model)
+        public async Task<IActionResult> Create(Vehicle vehicle)
         {
-
+            
             if (ModelState.IsValid)
             {
-                var vehicle = model.ToVehicle();
                 await _vehicleRepository.CreateAsync(vehicle);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
             }          
 
-            model.Clients = _vehicleRepository.GetComboClients();
-            return View(model);
+            return View(vehicle);
         }
 
         // GET: Vehicles/Edit/5

@@ -4,10 +4,11 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Vehicles for @ViewBag.ClientName</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" asp-route-clientId="@ViewBag.ClientId" class="btn btn-outline-primary" >Create New</a>
+    <a asp-controller="Clients" asp-action="Index" class="btn btn-outline-primary">Back to Clients</a>
 </p>
 <table class="table">
     <thead>
@@ -29,9 +30,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.FuelType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Client)
             </th>
             <th></th>
         </tr>
@@ -61,10 +59,10 @@
                 @Html.DisplayFor(modelItem => item.Client.Contact)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
+            </td> 
         </tr>
 }
     </tbody>
