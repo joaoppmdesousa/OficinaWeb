@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,6 +6,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OficinaWeb.Data;
+using Syncfusion.Licensing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OficinaWeb
 {
@@ -25,11 +26,16 @@ namespace OficinaWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NNaF5cXmBCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXlccXVXQ2dYUUF0WERWYUA="); 
+
+
             services.AddDbContext<DataContext>(cfg =>
                 cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IClientRepository, ClientRepository>();
             services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IMechanicRepository, MechanicRepository>();
+
 
 
             services.AddControllersWithViews();
