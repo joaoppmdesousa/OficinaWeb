@@ -29,5 +29,7 @@ namespace OficinaWeb.Data.Entities
         public TimeSpan ClockOut { get; set; }
 
         public bool Active { get; set; }
+
+        public User User { get; set; }
     }
 }

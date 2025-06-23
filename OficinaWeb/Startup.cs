@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OficinaWeb.Data;
+using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
 using Syncfusion.Licensing;
 using System;
 using System.Collections.Generic;
@@ -26,11 +29,29 @@ namespace OficinaWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NNaF5cXmBCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXlccXVXQ2dYUUF0WERWYUA="); 
+            services.AddIdentity<User, IdentityRole>(cfg =>
+            {
+                cfg.User.RequireUniqueEmail = true;
+                cfg.Password.RequireDigit = false;
+                cfg.Password.RequiredLength = 6;
+                cfg.Password.RequiredUniqueChars = 0;
+                cfg.Password.RequireLowercase = false;
+                cfg.Password.RequireUppercase = false;
+                cfg.Password.RequireNonAlphanumeric = false;
 
+            })
+              .AddDefaultTokenProviders()
+              .AddEntityFrameworkStores<DataContext>();
+
+            //SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NNaF5cXmBCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXlccXVXQ2dYUUF0WERWYUA="); 
 
             services.AddDbContext<DataContext>(cfg =>
                 cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<SeedDb>();
+
+            services.AddScoped<IUserHelper, UserHelper>();
+
 
             services.AddScoped<IClientRepository, ClientRepository>();
             services.AddScoped<IVehicleRepository, VehicleRepository>();
@@ -59,6 +80,7 @@ namespace OficinaWeb
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
 
 namespace OficinaWeb.Controllers
 {
     public class MechanicsController : Controller
     {
         private readonly DataContext _context;
+        private readonly IUserHelper _userHelper;
 
-        public MechanicsController(DataContext context)
+        public MechanicsController(
+            DataContext context,
+            IUserHelper userHelper)
         {
             _context = context;
+            _userHelper = userHelper;
         }
 
         // GET: Mechanics
@@ -58,6 +63,9 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
+                mechanic.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                //TODO: modificar para o user que tiver logado
+
                 if (mechanic.ClockOut <= mechanic.ClockIn)
                 {
                     ModelState.AddModelError("ClockOut", "Clock Out must be after Clock In.");
@@ -103,6 +111,9 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
+                    mechanic.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                    //TODO: modificar para o user que tiver logado
+
                     if (mechanic.ClockOut <= mechanic.ClockIn)
                     {
                         ModelState.AddModelError("ClockOut", "Clock Out must be after Clock In.");

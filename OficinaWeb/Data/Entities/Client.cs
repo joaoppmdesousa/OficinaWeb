@@ -26,6 +26,9 @@ namespace OficinaWeb.Data.Entities
         public string Email { get; set; }
 
 
+        public User User { get; set; }
+
+
 
 
 

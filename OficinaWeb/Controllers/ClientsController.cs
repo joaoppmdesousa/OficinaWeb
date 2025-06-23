@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
 
 namespace OficinaWeb.Controllers
 {
     public class ClientsController : Controller
     {
         private readonly IClientRepository _clientRepository;
+        private readonly IUserHelper _userHelper;
 
-        public ClientsController(IClientRepository clientRepository)
+        public ClientsController(
+            IClientRepository clientRepository,
+            IUserHelper userHelper)
         {
             _clientRepository = clientRepository;
+            _userHelper = userHelper;
         }
 
         // GET: Clients
@@ -57,6 +62,10 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
+                client.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                //TODO: modificar para o user que tiver logado
+
+
                 await _clientRepository.CreateAsync(client);
                 return RedirectToAction(nameof(Index));
             }
@@ -95,7 +104,10 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                   await _clientRepository.UpdateAsync(client);
+                    client.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                    //TODO: modificar para o user que tiver logado
+
+                    await _clientRepository.UpdateAsync(client);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

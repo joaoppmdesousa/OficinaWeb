@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
 using OficinaWeb.Models;
 
 namespace OficinaWeb.Controllers
@@ -14,10 +15,14 @@ namespace OficinaWeb.Controllers
     public class VehiclesController : Controller
     {
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IUserHelper _userHelper;
 
-        public VehiclesController(IVehicleRepository vehicleRepository)
+        public VehiclesController(
+            IVehicleRepository vehicleRepository,
+            IUserHelper userHelper)
         {
             _vehicleRepository = vehicleRepository;
+            _userHelper = userHelper;
         }
 
         // GET: Vehicles
@@ -92,9 +97,12 @@ namespace OficinaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Vehicle vehicle)
         {
-            
+
             if (ModelState.IsValid)
             {
+                vehicle.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                //TODO: modificar para o user que tiver logado
+
                 await _vehicleRepository.CreateAsync(vehicle);
                 return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
             }          
@@ -134,6 +142,9 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
+                    vehicle.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                    //TODO: modificar para o user que tiver logado
+
                     await _vehicleRepository.UpdateAsync(vehicle);
                 }
                 catch (DbUpdateConcurrencyException)
