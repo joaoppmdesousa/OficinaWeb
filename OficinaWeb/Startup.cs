@@ -29,6 +29,8 @@ namespace OficinaWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NMaF5cXmBCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXlcdHVVQ2hYU0N/XkFWYUE=");
+
             services.AddIdentity<User, IdentityRole>(cfg =>
             {
                 cfg.User.RequireUniqueEmail = true;
@@ -43,7 +45,7 @@ namespace OficinaWeb
               .AddDefaultTokenProviders()
               .AddEntityFrameworkStores<DataContext>();
 
-            //SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NNaF5cXmBCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXlccXVXQ2dYUUF0WERWYUA="); 
+            
 
             services.AddDbContext<DataContext>(cfg =>
                 cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
