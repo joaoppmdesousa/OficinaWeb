@@ -102,7 +102,7 @@ namespace OficinaWeb.Controllers
 
             if (ModelState.IsValid)
             {
-                vehicle.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                vehicle.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                 //TODO: modificar para o user que tiver logado
 
                 await _vehicleRepository.CreateAsync(vehicle);
@@ -144,7 +144,7 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                    vehicle.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                    vehicle.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                     //TODO: modificar para o user que tiver logado
 
                     await _vehicleRepository.UpdateAsync(vehicle);

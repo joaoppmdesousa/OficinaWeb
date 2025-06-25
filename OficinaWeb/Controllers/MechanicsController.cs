@@ -65,7 +65,7 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                mechanic.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                mechanic.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                 //TODO: modificar para o user que tiver logado
 
                 if (mechanic.ClockOut <= mechanic.ClockIn)
@@ -113,7 +113,7 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                    mechanic.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                    mechanic.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                     //TODO: modificar para o user que tiver logado
 
                     if (mechanic.ClockOut <= mechanic.ClockIn)

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
 using OficinaWeb.Models;
 using System.Linq;
@@ -59,6 +61,55 @@ namespace OficinaWeb.Controllers
         {
           await _userHelper.LogoutAsync();
           return RedirectToAction("Index", "Home");
+        }
+
+        public IActionResult Register()
+        {
+
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterNewUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(model.Username);
+                if (user == null)
+                {
+                    user = new User
+                    {
+                        Name = model.Name,
+                        Email = model.Username,
+                        UserName = model.Username
+                    };
+
+                    var result = await _userHelper.AddUserAsync(user, model.Password);
+                    if(result != IdentityResult.Success)
+                    {
+                        ModelState.AddModelError(string.Empty, "Failed to create user.");
+                        return View(model);
+                    }
+
+                    var loginViewModel = new LoginViewModel
+                    {
+                        Username = model.Username,
+                        Password = model.Password,
+                        RememberMe = false
+                    };
+
+                    var result2 = await _userHelper.LoginAsync(loginViewModel);
+                    if (result2.Succeeded)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    ModelState.AddModelError(string.Empty, "Failed to login.");                    
+                }                
+            }
+
+            return View(model);
         }
 
     }

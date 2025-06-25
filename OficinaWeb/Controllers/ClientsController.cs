@@ -64,7 +64,7 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                client.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                client.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                 //TODO: modificar para o user que tiver logado
 
 
@@ -106,7 +106,7 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                    client.User = await _userHelper.GetUserByEmailAsync("joaopedropsousa@gmail.com");
+                    client.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                     //TODO: modificar para o user que tiver logado
 
                     await _clientRepository.UpdateAsync(client);
