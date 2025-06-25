@@ -12,7 +12,7 @@ using OficinaWeb.Helpers;
 
 namespace OficinaWeb.Controllers
 {
-    [Authorize]
+    [Authorize(Roles ="Admin")]
     public class MechanicsController : Controller
     {
         private readonly DataContext _context;

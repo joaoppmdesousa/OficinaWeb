@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class VehiclesController : Controller
     {
         private readonly IVehicleRepository _vehicleRepository;

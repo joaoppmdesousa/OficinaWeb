@@ -12,7 +12,7 @@ using OficinaWeb.Helpers;
 
 namespace OficinaWeb.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class ClientsController : Controller
     {
         private readonly IClientRepository _clientRepository;
