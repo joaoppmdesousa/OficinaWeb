@@ -20,7 +20,7 @@ namespace OficinaWeb.Controllers
 
         public IActionResult Login()
         {
-            if(User.Identity.IsAuthenticated)
+            if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -30,7 +30,7 @@ namespace OficinaWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult>  Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -44,10 +44,6 @@ namespace OficinaWeb.Controllers
 
                     return this.RedirectToAction("Index", "Home");
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                }
             }
 
 
@@ -59,8 +55,8 @@ namespace OficinaWeb.Controllers
 
         public async Task<IActionResult> Logout()
         {
-          await _userHelper.LogoutAsync();
-          return RedirectToAction("Index", "Home");
+            await _userHelper.LogoutAsync();
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult Register()
@@ -86,7 +82,7 @@ namespace OficinaWeb.Controllers
                     };
 
                     var result = await _userHelper.AddUserAsync(user, model.Password);
-                    if(result != IdentityResult.Success)
+                    if (result != IdentityResult.Success)
                     {
                         ModelState.AddModelError(string.Empty, "Failed to create user.");
                         return View(model);
@@ -105,12 +101,85 @@ namespace OficinaWeb.Controllers
                         return RedirectToAction("Index", "Home");
                     }
 
-                    ModelState.AddModelError(string.Empty, "Failed to login.");                    
-                }                
+                    ModelState.AddModelError(string.Empty, "Failed to login.");
+                }
             }
 
             return View(model);
         }
+
+        public async Task<IActionResult> ChangeUser()
+        {
+            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+            var model = new ChangeUserViewModel();
+            if (user != null)
+            {
+                model.Name = user.Name;
+            }
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+                if (user != null)
+                {
+                    user.Name = model.Name;
+                    var response = await _userHelper.UpdateUserAsync(user);
+                    if (response.Succeeded)
+                    {
+                        ViewBag.UserMessage = "User updated successfully.";
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description);
+                    }
+
+                }
+            }
+            return View(model);
+
+        }
+
+
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
+                if (user != null)
+                {
+                    var result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return this.RedirectToAction("ChangeUser");
+                    }
+                    else
+                    {
+                        this.ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
+                    }
+                }
+                else
+                {
+                    this.ModelState.AddModelError(string.Empty, "User not found.");
+                }
+            }
+
+            return this.View(model);
+        }
+
 
     }
 }
