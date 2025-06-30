@@ -59,9 +59,9 @@
                 @Html.DisplayFor(modelItem => item.Client.Contact)
             </td>
             <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })" class="btn btn-outline-secondary">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })"  class="btn btn-outline-secondary">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })" class="btn btn-outline-danger">Delete</a>
             </td> 
         </tr>
 }

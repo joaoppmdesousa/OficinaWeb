@@ -1,0 +1,39 @@
+﻿@model OficinaWeb.Models.MyVehiclesViewModel
+@{
+    ViewData["Title"] = "MyVehicles";
+}
+
+<h1>My Vehicles</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().LicensePlate)</th>
+            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Brand)</th>
+            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Model)</th>
+            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Year)</th>
+            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Mileage)</th>
+            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().FuelType)</th>
+            <th>Contact</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.MyVehicles)
+        {
+            <tr>
+                <td>@item.LicensePlate</td>
+                <td>@item.Brand</td>
+                <td>@item.Model</td>
+                <td>@item.Year</td>
+                <td>@item.Mileage</td>
+                <td>@item.FuelType</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")"  class="btn btn-outline-secondary">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")" class="btn btn-outline-secondary">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")"  class="btn btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

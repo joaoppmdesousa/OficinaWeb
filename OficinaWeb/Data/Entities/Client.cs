@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace OficinaWeb.Data.Entities
 {
@@ -24,9 +26,11 @@ namespace OficinaWeb.Data.Entities
         [MaxLength(50)]
         [EmailAddress]
         public string Email { get; set; }
-
+     
+        public ICollection<RepairAndServices> RepairsAndServices { get; set; }
 
         public User User { get; set; }
+
 
 
 

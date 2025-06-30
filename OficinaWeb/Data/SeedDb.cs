@@ -24,7 +24,6 @@ namespace OficinaWeb.Data
             await _userHelper.CheckRoleAsync("Admin");
             await _userHelper.CheckRoleAsync("Client");
             await _userHelper.CheckRoleAsync("Employee");
-            await _userHelper.CheckRoleAsync("AnonUser");
 
 
 

@@ -6,5 +6,6 @@ namespace OficinaWeb.Data.Entities
     {
         public string Name { get; set; }
 
+
     }
 }

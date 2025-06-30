@@ -22,7 +22,8 @@ namespace OficinaWeb.Models
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; }
 
-
+        [Required]
+        public string Role { get; set; }
 
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
+using OficinaWeb.Models;
 
 namespace OficinaWeb.Controllers
 {
@@ -17,13 +18,16 @@ namespace OficinaWeb.Controllers
     {
         private readonly IClientRepository _clientRepository;
         private readonly IUserHelper _userHelper;
+        private readonly DataContext _context;
 
         public ClientsController(
             IClientRepository clientRepository,
-            IUserHelper userHelper)
+            IUserHelper userHelper,
+            DataContext context)
         {
             _clientRepository = clientRepository;
             _userHelper = userHelper;
+            _context = context;
         }
 
         // GET: Clients
@@ -31,6 +35,38 @@ namespace OficinaWeb.Controllers
         {
             return View(_clientRepository.GetAll().OrderBy(c => c.Name));
         }
+
+
+        // GET: Clients Users
+        [Authorize(Roles = "Admin")]
+        public IActionResult AdminClientList()
+        {
+            var allClients = _clientRepository.GetAll().ToList();
+            var allUsers = _userHelper.GetAllUsers();
+
+            var userEmails = allUsers.Select(u => u.UserName.ToLower()).ToHashSet();
+
+            var clientsWithUser = allClients
+                .Where(c => userEmails.Contains(c.Email.ToLower()))
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            var clientsWithoutUser = allClients
+                .Where(c => !userEmails.Contains(c.Email.ToLower()))
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            var model = new AdminClientListViewModel
+            {
+                ClientsWithUser = clientsWithUser,
+                ClientsWithoutUser = clientsWithoutUser
+            };
+
+            return View(model);
+
+
+        }
+
 
         // GET: Clients/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -64,10 +100,7 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                client.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                //TODO: modificar para o user que tiver logado
-
-
+              
                 await _clientRepository.CreateAsync(client);
                 return RedirectToAction(nameof(Index));
             }
@@ -106,9 +139,6 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                    client.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                    //TODO: modificar para o user que tiver logado
-
                     await _clientRepository.UpdateAsync(client);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -153,6 +183,27 @@ namespace OficinaWeb.Controllers
             await _clientRepository.DeleteAsync(client);
             return RedirectToAction(nameof(Index));
         }
- 
+
+
+
+
+
+        [HttpGet]
+        public IActionResult SearchClients(string search)
+        {
+            var clients = _clientRepository.GetAll()
+                .Where(c => string.IsNullOrEmpty(search) || c.Name.Contains(search))
+                .OrderBy(c => c.Name)
+                .Select(c => new {
+                    id = c.Id,
+                    name = c.Name,
+                    email = c.Email
+                })
+                .ToList();
+
+            return Json(clients);
+        }
+
+
     }
 }

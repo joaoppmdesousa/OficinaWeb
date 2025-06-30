@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace OficinaWeb.Helpers
@@ -8,6 +9,8 @@ namespace OficinaWeb.Helpers
     public interface IUserHelper
     {
         Task<User> GetUserByEmailAsync(string email);
+
+        Task<User> GetUserByIdAsync(string id);
 
         Task<IdentityResult> AddUserAsync(User user, string password);
 
@@ -24,5 +27,7 @@ namespace OficinaWeb.Helpers
         Task AddUserToRoleAsync(User user, string roleName);
 
         Task<bool> IsUserInRoleAsync(User user, string roleName);
+
+        List<User> GetAllUsers();
     }
 }

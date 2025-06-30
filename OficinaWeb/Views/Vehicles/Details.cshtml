@@ -56,5 +56,5 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-success">Edit</a>
-    <a asp-route-clientId="@Model.ClientId"  asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+    <a href="@ViewBag.ReturnUrl" class="btn btn-outline-primary">Back to List</a>
 </div>

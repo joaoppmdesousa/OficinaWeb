@@ -1,0 +1,64 @@
+﻿@model OficinaWeb.Models.AdminClientListViewModel
+@{
+    ViewData["Title"] = "AdminClientList";
+}
+
+<h1>Admin Client List</h1>
+
+<h2>Clients with user</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithUser.First().Name)</th>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithUser.First().Contact)</th>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithUser.First().TaxNumber)</th>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithUser.First().Email)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ClientsWithUser)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Contact</td>
+                <td>@item.TaxNumber</td>
+                <td>@item.Email</td>
+      
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Clients without user</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithoutUser.First().Name)</th>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithoutUser.First().Contact)</th>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithoutUser.First().TaxNumber)</th>
+            <th>@Html.DisplayNameFor(model => model.ClientsWithoutUser.First().Email)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ClientsWithoutUser)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Contact</td>
+                <td>@item.TaxNumber</td>
+                <td>@item.Email</td>
+                <td>
+
+                    <form asp-action="CreateUserForClient" method="post" asp-controller="Account">
+                        <input type="hidden" name="clientId" value="@item.Id" />
+                        <button type="submit" class="btn btn-outline-success">Add User</button>
+                    </form>
+                
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

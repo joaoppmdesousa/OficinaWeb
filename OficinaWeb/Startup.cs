@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,8 +13,10 @@ using OficinaWeb.Helpers;
 using Syncfusion.Licensing;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace OficinaWeb
 {
@@ -58,6 +61,30 @@ namespace OficinaWeb
             services.AddScoped<IClientRepository, ClientRepository>();
             services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<IMechanicRepository, MechanicRepository>();
+            services.AddScoped<IRepairAndServicesRepository, RepairAndServicesRepository>();
+            services.AddScoped<IPartsRepository, PartsRepository>();
+
+
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+           
+           
+            new CultureInfo("en-US"), 
+            new CultureInfo("pt-PT")  
+                 };
+
+               
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+
+                
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+
+              
+                options.ApplyCurrentCultureToResponseHeaders = true;
+            });
 
 
 
@@ -79,6 +106,16 @@ namespace OficinaWeb
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            var defaultCulture = new CultureInfo("en-US");
+            var localizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(defaultCulture),
+                SupportedCultures = new List<CultureInfo> { defaultCulture },
+                SupportedUICultures = new List<CultureInfo> { defaultCulture },
+                ApplyCurrentCultureToResponseHeaders = true
+            };
+            app.UseRequestLocalization(localizationOptions);
 
             app.UseRouting();
 

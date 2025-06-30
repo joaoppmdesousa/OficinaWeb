@@ -19,6 +19,21 @@ namespace OficinaWeb.Migrations
                 .HasAnnotation("ProductVersion", "5.0.17")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("MechanicRepairAndServices", b =>
+                {
+                    b.Property<int>("MechanicsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RepairAndServicesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MechanicsId", "RepairAndServicesId");
+
+                    b.HasIndex("RepairAndServicesId");
+
+                    b.ToTable("MechanicRepairAndServices");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -175,12 +190,12 @@ namespace OficinaWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("userId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("userId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Clients");
                 });
@@ -215,14 +230,37 @@ namespace OficinaWeb.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<string>("userId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("userId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Mechanics");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.Part", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RepairAndServicesId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RepairAndServicesId");
+
+                    b.ToTable("Parts");
                 });
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.RepairAndServices", b =>
@@ -232,11 +270,20 @@ namespace OficinaWeb.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<TimeSpan>("BeginDate")
-                        .HasColumnType("time");
+                    b.Property<DateTime>("BeginDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<TimeSpan>("EndDate")
-                        .HasColumnType("time");
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ServicePrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ServiceType")
                         .IsRequired()
@@ -246,6 +293,8 @@ namespace OficinaWeb.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
 
                     b.HasIndex("VehicleId");
 
@@ -352,19 +401,34 @@ namespace OficinaWeb.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("Year")
                         .HasColumnType("int");
-
-                    b.Property<string>("userId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
 
-                    b.HasIndex("userId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("MechanicRepairAndServices", b =>
+                {
+                    b.HasOne("OficinaWeb.Data.Entities.Mechanic", null)
+                        .WithMany()
+                        .HasForeignKey("MechanicsId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OficinaWeb.Data.Entities.RepairAndServices", null)
+                        .WithMany()
+                        .HasForeignKey("RepairAndServicesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -420,29 +484,48 @@ namespace OficinaWeb.Migrations
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.Client", b =>
                 {
-                    b.HasOne("OficinaWeb.Data.Entities.User", "user")
+                    b.HasOne("OficinaWeb.Data.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("userId");
+                        .HasForeignKey("UserId");
 
-                    b.Navigation("user");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.Mechanic", b =>
                 {
-                    b.HasOne("OficinaWeb.Data.Entities.User", "user")
+                    b.HasOne("OficinaWeb.Data.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("userId");
+                        .HasForeignKey("UserId");
 
-                    b.Navigation("user");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.Part", b =>
+                {
+                    b.HasOne("OficinaWeb.Data.Entities.RepairAndServices", "RepairAndServices")
+                        .WithMany("Parts")
+                        .HasForeignKey("RepairAndServicesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RepairAndServices");
                 });
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.RepairAndServices", b =>
                 {
+                    b.HasOne("OficinaWeb.Data.Entities.Client", "Client")
+                        .WithMany("RepairsAndServices")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("OficinaWeb.Data.Entities.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Client");
 
                     b.Navigation("Vehicle");
                 });
@@ -452,16 +535,26 @@ namespace OficinaWeb.Migrations
                     b.HasOne("OficinaWeb.Data.Entities.Client", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("OficinaWeb.Data.Entities.User", "user")
+                    b.HasOne("OficinaWeb.Data.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("userId");
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Client");
 
-                    b.Navigation("user");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.Client", b =>
+                {
+                    b.Navigation("RepairsAndServices");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.RepairAndServices", b =>
+                {
+                    b.Navigation("Parts");
                 });
 #pragma warning restore 612, 618
         }

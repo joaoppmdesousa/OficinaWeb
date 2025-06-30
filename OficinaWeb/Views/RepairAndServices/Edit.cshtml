@@ -1,0 +1,354 @@
+﻿@model OficinaWeb.Data.Entities.RepairAndServices
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2>Edit Services</h2>
+
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ServiceType" class="control-label"></label>
+                <input asp-for="ServiceType" class="form-control" />
+                <span asp-validation-for="ServiceType" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="SelectedClientName">Client</label>
+                <div class="input-group">
+                    <input type="text" id="SelectedClientName" class="form-control" readonly value="@Model.Client?.Name" />
+                    <input type="hidden" id="ClientId" name="ClientId" value="@Model.ClientId" />
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#clientModal">
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="VehicleId" class="control-label"></label>
+                <select asp-for="VehicleId" class="form-control" id="VehicleId"></select>
+                <span asp-validation-for="VehicleId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Details" class="control-label"></label>
+                <input asp-for="Details" class="form-control" />
+                <span asp-validation-for="Details" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="BeginDate" class="control-label"></label>
+                <input asp-for="BeginDate" class="form-control" />
+                <span asp-validation-for="BeginDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndDate" class="control-label"></label>
+                <input asp-for="EndDate" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="SelectedMechanics">Mechanics</label>
+                <div class="input-group">
+                    <input type="text" id="SelectedMechanics" class="form-control" placeholder="Selected mechanics..." readonly />
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#mechanicModal">
+                        Search
+                    </button>
+                </div>
+                <div id="mechanicIdsContainer"></div>
+                <span asp-validation-for="MechanicIds" class="text-danger"></span>
+            </div>
+
+
+
+
+            <div class="form-group">
+                <label asp-for="ServicePrice" class="control-label"></label>
+                <input asp-for="ServicePrice" class="form-control" />
+                <span asp-validation-for="ServicePrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Edit" class="btn btn-outline-success" />
+                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientModalLabel">Select a Client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="clientSearch" class="form-control mb-3" placeholder="Search clients..." />
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="mechanicModal" tabindex="-1" aria-labelledby="mechanicModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mechanicModalLabel">Select Mechanics</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="mechanicSearch" class="form-control mb-3" placeholder="Search mechanics..." />
+                <form id="mechanicForm">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mechanicTableBody">
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary">Add Selected</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const searchInput = document.getElementById("clientSearch");
+        const tableBody = document.getElementById("clientTableBody");
+        const selectedClientName = document.getElementById("SelectedClientName");
+        const selectedClientId = document.getElementById("ClientId");
+        const vehicleSelect = document.getElementById("VehicleId");
+
+        vehicleSelect.disabled = true;
+
+
+            const clientId = selectedClientId.value;
+             if (clientId) {
+                 fetch(`/Vehicles/GetVehiclesByClientId?clientId=${clientId}`)
+              .then(res => res.json())
+              .then(vehicles => {
+                 vehicleSelect.innerHTML = "";
+
+                if (vehicles.length === 0) {
+                    vehicleSelect.innerHTML = '<option value="">No vehicles available</option>';
+                    vehicleSelect.disabled = true;
+                    return;
+                }
+
+                vehicleSelect.disabled = false;
+                vehicleSelect.innerHTML = '<option value="">-- Select a vehicle --</option>';
+
+                vehicles.forEach(vehicle => {
+                    const opt = document.createElement("option");
+                    opt.value = vehicle.id;
+                    opt.text = vehicle.name;
+                    if (vehicle.id == "@Model.VehicleId") {
+                        opt.selected = true;
+                    }
+                    vehicleSelect.appendChild(opt);
+                });
+            });
+    }
+
+        function fetchClients(query = "") {
+            fetch(`/Clients/SearchClients?search=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    tableBody.innerHTML = "";
+                    data.forEach(client => {
+                        const row = document.createElement("tr");
+
+                        row.innerHTML = `
+                            <td>${client.name}</td>
+                            <td>${client.email}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" data-id="${client.id}" data-name="${client.name}">
+                                    Select
+                                </button>
+                            </td>
+                        `;
+
+                        row.querySelector("button").addEventListener("click", (e) => {
+                            // Set client name & ID
+                            selectedClientName.value = client.name;
+                            selectedClientId.value = client.id;
+
+                            // Fetch vehicles
+                            fetch(`/Vehicles/GetVehiclesByClientId?clientId=${client.id}`)
+                                .then(res => res.json())
+                                .then(vehicles => {
+                                    vehicleSelect.innerHTML = "";
+
+                                    if (vehicles.length === 0) {
+                                        vehicleSelect.innerHTML = '<option value="">No vehicles available</option>';
+                                        vehicleSelect.disabled = true;
+                                        return;
+                                    }
+
+                                    vehicleSelect.disabled = false;
+                                    vehicleSelect.innerHTML = '<option value="">-- Select a vehicle --</option>';
+
+                                    vehicles.forEach(vehicle => {
+                                        const opt = document.createElement("option");
+                                        opt.value = vehicle.id;
+                                        opt.text = vehicle.name;
+                                        vehicleSelect.appendChild(opt);
+                                    });
+                                });
+
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
+                            modal.hide();
+                        });
+
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.trim();
+            fetchClients(query);
+        });
+
+        fetchClients(); // Initial load
+
+    });
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const mechanicSearch = document.getElementById("mechanicSearch");
+        const mechanicTableBody = document.getElementById("mechanicTableBody");
+        const mechanicForm = document.getElementById("mechanicForm");
+        const selectedMechanicsInput = document.getElementById("SelectedMechanics");
+        const mechanicIdsContainer = document.getElementById("mechanicIdsContainer");
+
+        let selectedMechanics = [];
+
+      
+        const initialMechanics = [
+            @foreach (var mechanic in Model.Mechanics ?? new List<OficinaWeb.Data.Entities.Mechanic>())
+            {
+                    @: { id: @mechanic.Id, name: "@mechanic.Name" },
+            }
+        ];
+
+        selectedMechanics = initialMechanics;
+
+        selectedMechanicsInput.value = selectedMechanics.map(m => m.name).join(", ");
+        mechanicIdsContainer.innerHTML = "";
+        selectedMechanics.forEach(m => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "MechanicIds";
+            input.value = m.id;
+            mechanicIdsContainer.appendChild(input);
+        });
+
+        function fetchMechanics(query = "") {
+            const selectedMechanicIds = selectedMechanics.map(m => parseInt(m.id));
+
+            fetch(`/Mechanics/SearchMechanics?search=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    mechanicTableBody.innerHTML = "";
+
+                    data.forEach(mechanic => {
+                        const isChecked = selectedMechanicIds.includes(mechanic.id);
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>
+                                <input type="checkbox" class="mechanic-checkbox" value="${mechanic.id}" data-name="${mechanic.name}" ${isChecked ? "checked" : ""}>
+                            </td>
+                            <td>${mechanic.name}</td>
+                        `;
+                        mechanicTableBody.appendChild(row);
+                    });
+
+                    updateSelectedMechanicsFromCheckboxes();
+                })
+                .catch(error => {
+                    console.error("Error fetching mechanics:", error);
+                });
+        }
+
+        function updateSelectedMechanicsFromCheckboxes() {
+            selectedMechanics = [];
+            mechanicIdsContainer.innerHTML = "";
+
+            document.querySelectorAll(".mechanic-checkbox:checked").forEach(cb => {
+                selectedMechanics.push({
+                    id: cb.value,
+                    name: cb.dataset.name
+                });
+
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "MechanicIds";
+                input.value = cb.value;
+                mechanicIdsContainer.appendChild(input);
+            });
+
+            selectedMechanicsInput.value = selectedMechanics.map(m => m.name).join(", ");
+        }
+
+        mechanicForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            updateSelectedMechanicsFromCheckboxes();
+
+            const modalElement = document.getElementById('mechanicModal');
+            if (modalElement && window.bootstrap) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) modal.hide();
+            }
+        });
+
+        mechanicSearch.addEventListener("input", () => {
+            const query = mechanicSearch.value.trim();
+            fetchMechanics(query);
+        });
+
+        fetchMechanics();
+
+        const editForm = document.querySelector('form[asp-action="Edit"]');
+        if (editForm) {
+            editForm.addEventListener("submit", function () {
+                const mechanicIds = Array.from(document.querySelectorAll('#mechanicIdsContainer input[name="MechanicIds"]')).map(input => input.value);
+             
+            });
+        }
+    });
+</script>

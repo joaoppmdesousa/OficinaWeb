@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace OficinaWeb.Data.Entities
@@ -29,6 +30,8 @@ namespace OficinaWeb.Data.Entities
         public TimeSpan ClockOut { get; set; }
 
         public bool Active { get; set; }
+
+        public List<RepairAndServices> RepairAndServices { get; set; }
 
         public User User { get; set; }
     }

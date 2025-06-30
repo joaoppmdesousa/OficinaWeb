@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Models;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OficinaWeb.Helpers
@@ -54,6 +56,11 @@ namespace OficinaWeb.Helpers
             return await _userManager.FindByEmailAsync(email);
         }
 
+        public async Task<User> GetUserByIdAsync(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
+        }
+
         public async Task<bool> IsUserInRoleAsync(User user, string roleName)
         {
             return await _userManager.IsInRoleAsync(user, roleName);
@@ -77,5 +84,12 @@ namespace OficinaWeb.Helpers
         {
             return await _userManager.UpdateAsync(user);
         }
+
+        public List<User> GetAllUsers()
+        {
+            return _userManager.Users.ToList();
+        }
+
+
     }
 }

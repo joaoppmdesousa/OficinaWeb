@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
 using OficinaWeb.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,10 +16,12 @@ namespace OficinaWeb.Controllers
     public class AccountController : Controller
     {
         private readonly IUserHelper _userHelper;
+        private IClientRepository _clientRepository;
 
-        public AccountController(IUserHelper userHelper)
+        public AccountController(IUserHelper userHelper, IClientRepository clientRepository)
         {
             _userHelper = userHelper;
+            _clientRepository = clientRepository;
         }
 
 
@@ -64,6 +70,13 @@ namespace OficinaWeb.Controllers
         public IActionResult Register()
         {
 
+            ViewBag.Roles = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Admin", Value = "Admin" },
+                new SelectListItem { Text = "Employee", Value = "Employee" },
+                new SelectListItem { Text = "Client", Value = "Client" }
+            };
+
             return View();
         }
 
@@ -71,6 +84,14 @@ namespace OficinaWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterNewUserViewModel model)
         {
+
+            ViewBag.Roles = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Admin", Value = "Admin" },
+                new SelectListItem { Text = "Employee", Value = "Employee" },
+                new SelectListItem { Text = "Client", Value = "Client" }
+            };
+
             if (ModelState.IsValid)
             {
                 var user = await _userHelper.GetUserByEmailAsync(model.Username);
@@ -97,6 +118,14 @@ namespace OficinaWeb.Controllers
                         RememberMe = false
                     };
 
+                    await _userHelper.AddUserToRoleAsync(user, model.Role);
+
+                    if (model.Role == "Client")
+                    {
+                        return RedirectToAction("AssociateClientToUser", new { userId = user.Id });
+                    }
+
+
                     var result2 = await _userHelper.LoginAsync(loginViewModel);
                     if (result2.Succeeded)
                     {
@@ -106,6 +135,13 @@ namespace OficinaWeb.Controllers
                     ModelState.AddModelError(string.Empty, "Failed to login.");
                 }
             }
+
+            ViewBag.Roles = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Admin", Value = "Admin" },
+                new SelectListItem { Text = "Employee", Value = "Employee" },
+                new SelectListItem { Text = "Client", Value = "Client" }
+            };
 
             return View(model);
         }
@@ -182,6 +218,43 @@ namespace OficinaWeb.Controllers
             return this.View(model);
         }
 
+        
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateUserForClient(int clientId)
+        {
+            var client = await _clientRepository.GetIdAsync(clientId);
+            if (client == null) return NotFound();
+
+            var existingUser = await _userHelper.GetUserByEmailAsync(client.Email);
+            if (existingUser != null)
+            {
+                TempData["Error"] = "Já existe um usuário com esse email.";
+                return RedirectToAction("AdminClientList", "Clients");
+            }
+
+            var user = new User
+            {
+                Name = client.Name,
+                Email = client.Email,
+                UserName = client.Email,
+                PhoneNumber = client.Contact,
+            };
+
+            var result = await _userHelper.AddUserAsync(user, "123456"); //TODO Senha padrão, deve ser alterada posteriormente
+
+            if (result.Succeeded)
+            {
+                await _userHelper.AddUserToRoleAsync(user, "Client");
+                TempData["Success"] = "Usuário criado com sucesso.";
+            }
+            else
+            {
+                TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+
+            return RedirectToAction("AdminClientList", "Clients"); ;
+        }
 
     }
 }

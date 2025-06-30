@@ -170,6 +170,23 @@ namespace OficinaWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> SearchMechanics(string search)
+        {
+            var mechanics = await _context.Mechanics
+                .Where(m => string.IsNullOrEmpty(search) || m.Name.Contains(search))
+                .Select(m => new
+                {
+                    id = m.Id,
+                    name = m.Name,
+                })
+                .ToListAsync();
+
+            return Json(mechanics);
+        }
+
+
         private bool MechanicExists(int id)
         {
             return _context.Mechanics.Any(e => e.Id == id);
