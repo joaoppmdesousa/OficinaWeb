@@ -176,23 +176,13 @@ namespace OficinaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            
-            var repairAndServices = await _repairAndServicesRepository.GetWithIncludesAsync(id);
+            var result = await _repairAndServicesRepository.RemoveRepairAndServicesAsync(id);
 
-            if (repairAndServices == null)
-            {
+            if (!result)
                 return NotFound();
-            }
-                
-            
-            repairAndServices.Mechanics.Clear();
-
-            await _repairAndServicesRepository.Save;
-
-
-            await _repairAndServicesRepository.DeleteAsync(repairAndServices);
 
             return RedirectToAction(nameof(Index));
+
         }
 
 

@@ -11,5 +11,7 @@ namespace OficinaWeb.Data
         public Task<RepairAndServices> GetWithIncludesAsync(int id);
 
         public Task UpdateMechanicsAsync(int repairId, List<int> newMechanicIds);
+
+        public Task<bool> RemoveRepairAndServicesAsync(int id);
     }
 }

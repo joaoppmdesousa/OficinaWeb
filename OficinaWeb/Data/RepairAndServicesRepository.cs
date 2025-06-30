@@ -86,5 +86,25 @@ namespace OficinaWeb.Data
             await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> RemoveRepairAndServicesAsync(int id)
+        {
+            var service = await _context.RepairsAndServices
+                .Include(r => r.Mechanics)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (service == null)
+                return false;
+
+           
+            service.Mechanics.Clear();
+            await _context.SaveChangesAsync(); 
+
+            
+            _context.RepairsAndServices.Remove(service);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+
+
     }
 }
