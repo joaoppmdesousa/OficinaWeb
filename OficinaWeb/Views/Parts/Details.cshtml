@@ -23,15 +23,9 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.UnitPrice)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RepairAndServices)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RepairAndServices.ServiceType)
-        </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" class="btn btn-outline-success" asp-route-id="@Model.Id" asp-route-serviceId="@ViewBag.ServiceId">Edit</a>
+    <a asp-action="Index" class="btn btn-outline-primary" asp-route-serviceId="@ViewBag.ServiceId">Back to List</a>
 </div>

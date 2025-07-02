@@ -7,7 +7,7 @@
 <h2>Parts For Service #@ViewBag.ServiceId</h2>
 
 <p>
-    <a asp-action="Create" class="btn btn-outline-success">Add Part</a>
+    <a asp-action="Create" asp-route-serviceId="@ViewBag.ServiceId" class="btn btn-outline-success">Add Part</a>
     <a asp-controller="RepairAndServices" asp-action="Index" class="btn btn-outline-primary">Back to Service List</a>
 </p>
 <table class="table">
@@ -34,9 +34,9 @@
             </td>
 
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="Edit" class="btn btn-outline-secondary" asp-route-id="@item.Id" asp-route-serviceId="@ViewBag.ServiceId">Edit</a>
+                    <a asp-action="Details" class="btn btn-outline-secondary" asp-route-id="@item.Id" asp-route-serviceId="@ViewBag.ServiceId">Details</a>
+                    <a asp-action="Delete" class="btn btn-outline-danger" asp-route-id="@item.Id" asp-route-serviceId="@ViewBag.ServiceId">Delete</a>
             </td>
         </tr>
 }

@@ -25,18 +25,17 @@
                 <span asp-validation-for="UnitPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="RepairAndServicesId" class="control-label"></label>
-                <select asp-for="RepairAndServicesId" class="form-control" asp-items="ViewBag.RepairAndServicesId"></select>
-                <span asp-validation-for="RepairAndServicesId" class="text-danger"></span>
+                <input asp-for="RepairAndServicesId" value="@ViewBag.ServiceId" type="hidden" />
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Save" class="btn btn-outline-success" />
+                <a asp-action="Index" class="btn btn-outline-primary" asp-route-serviceId="@ViewBag.ServiceId">Back to List</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+
+    
+
 

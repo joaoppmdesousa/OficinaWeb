@@ -48,12 +48,14 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: Parts/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, int serviceId)
         {
             if (id == null)
             {
                 return NotFound();
             }
+
+            ViewBag.ServiceId = serviceId;
 
             var part = await _context.Parts
                 .Include(p => p.RepairAndServices)
@@ -67,9 +69,16 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: Parts/Create
-        public IActionResult Create()
+        public IActionResult Create(int? serviceId)
         {
-            ViewData["RepairAndServicesId"] = new SelectList(_context.RepairsAndServices, "Id", "ServiceType");
+
+            if (serviceId == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.ServiceId = serviceId;
+          
             return View();
         }
 
@@ -84,26 +93,28 @@ namespace OficinaWeb.Controllers
             {
                 _context.Add(part);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", new { serviceId = part.RepairAndServicesId });
             }
-            ViewData["RepairAndServicesId"] = new SelectList(_context.RepairsAndServices, "Id", "ServiceType", part.RepairAndServicesId);
+           
             return View(part);
         }
 
         // GET: Parts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, int serviceId)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
+            ViewBag.ServiceId = serviceId;
+
             var part = await _context.Parts.FindAsync(id);
             if (part == null)
             {
                 return NotFound();
             }
-            ViewData["RepairAndServicesId"] = new SelectList(_context.RepairsAndServices, "Id", "ServiceType", part.RepairAndServicesId);
+           
             return View(part);
         }
 
@@ -137,19 +148,21 @@ namespace OficinaWeb.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", new { serviceId = part.RepairAndServicesId });
             }
-            ViewData["RepairAndServicesId"] = new SelectList(_context.RepairsAndServices, "Id", "ServiceType", part.RepairAndServicesId);
+           
             return View(part);
         }
 
         // GET: Parts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, int serviceId)
         {
             if (id == null)
             {
                 return NotFound();
             }
+
+            ViewBag.ServiceId = serviceId;
 
             var part = await _context.Parts
                 .Include(p => p.RepairAndServices)
@@ -170,7 +183,7 @@ namespace OficinaWeb.Controllers
             var part = await _context.Parts.FindAsync(id);
             _context.Parts.Remove(part);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", new { serviceId = part.RepairAndServicesId });
         }
 
         private bool PartExists(int id)

@@ -162,7 +162,7 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var repairAndServices = await _repairAndServicesRepository.GetIdAsync(id.Value);
+            var repairAndServices = await _repairAndServicesRepository.GetWithIncludesAsync(id.Value);
             if (repairAndServices == null)
             {
                 return NotFound();

@@ -1,4 +1,6 @@
-﻿namespace OficinaWeb.Data.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace OficinaWeb.Data.Entities
 {
     public class Part : IEntity
     {
@@ -6,6 +8,7 @@
 
         public string Name { get; set; }
 
+        [Display(Name = "Price")]
         public decimal UnitPrice { get; set; }
 
         public int RepairAndServicesId { get; set; }

@@ -156,7 +156,7 @@
              const selectedClientId = document.getElementById("ClientId");
              const vehicleSelect = document.getElementById("VehicleId");
 
-             vehicleSelect.disabled = true; // Disable until client is selected
+             vehicleSelect.disabled = true;
 
              function fetchClients(query = "") {
                  fetch(`/Clients/SearchClients?search=${encodeURIComponent(query)}`)
@@ -170,18 +170,18 @@
                                  <td>${client.name}</td>
                                  <td>${client.email}</td>
                                  <td>
-                                     <button class="btn btn-sm btn-primary" data-id="${client.id}" data-name="${client.name}">
+                                     <button class="btn btn-sm btn-outline-success" data-id="${client.id}" data-name="${client.name}">
                                          Select
                                      </button>
                                  </td>
                              `;
 
                              row.querySelector("button").addEventListener("click", (e) => {
-                                 // Set client name & ID
+                               
                                  selectedClientName.value = client.name;
                                  selectedClientId.value = client.id;
 
-                                 // Fetch vehicles
+                                
                                  fetch(`/Vehicles/GetVehiclesByClientId?clientId=${client.id}`)
                                      .then(res => res.json())
                                      .then(vehicles => {
@@ -204,7 +204,7 @@
                                          });
                                      });
 
-                                 // Close modal
+                                 
                                  const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
                                  modal.hide();
                              });
@@ -219,8 +219,7 @@
                  fetchClients(query);
              });
 
-             fetchClients(); // Initial load
-
+             fetchClients(); 
          });
 </script>
 
