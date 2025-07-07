@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" onsubmit="return validateClockTimes()">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
@@ -36,7 +36,7 @@
             <div class="form-group">
                 <label asp-for="ClockOut" class="control-label"></label>
                 <ejs-timepicker id="clockOut" asp-for="ClockOut" format="HH:mm" value="@($"{Model.ClockOut.Hours:D2}:{Model.ClockOut.Minutes:D2}")" ></ejs-timepicker>
-                <span asp-validation-for="ClockOut" class="text-danger"></span>
+                <span asp-validation-for="ClockOut" id="clockError" class="text-danger"></span>
             </div>
             <div class="form-group form-check">
                 <label class="form-check-label">
@@ -53,5 +53,26 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function validateClockTimes() {
+             const clockInObj = document.getElementById("clockIn").ej2_instances[0];
+             const clockOutObj = document.getElementById("clockOut").ej2_instances[0];
 
+            const clockIn = clockInObj.value;
+            const clockOut = clockOutObj.value;
+
+            if (!clockIn || !clockOut)
+            {
+                return true;
+            }
+
+            if (clockOut <= clockIn) {
+                document.getElementById("clockError").innerText = "Clock Out must be after Clock In.";
+                return false; 
+            }
+
+            document.getElementById("clockError").innerText = "";
+            return true;
+        }
+    </script>
 }

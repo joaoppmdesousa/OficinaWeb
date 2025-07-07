@@ -33,6 +33,9 @@ namespace OficinaWeb.Data.Entities
 
         public List<RepairAndServices> RepairAndServices { get; set; }
 
+        public ICollection<Appointment> Appointments { get; set; }
+
+
         public User User { get; set; }
     }
 }

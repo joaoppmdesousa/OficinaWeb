@@ -46,11 +46,22 @@ namespace OficinaWeb.Data
                .OnDelete(DeleteBehavior.Restrict);
 
 
-            
+
+            modelBuilder.Entity<Part>()
+                .Property(p => p.UnitPrice)
+                .HasColumnType("decimal(18,2)");
+
+
+            modelBuilder.Entity<RepairAndServices>()
+               .Property(p => p.ServicePrice)
+               .HasColumnType("decimal(18,2)");
+
 
             base.OnModelCreating(modelBuilder);
             
         }
+            
+        public DbSet<OficinaWeb.Data.Entities.Appointment> Appointment { get; set; }
      
 
 

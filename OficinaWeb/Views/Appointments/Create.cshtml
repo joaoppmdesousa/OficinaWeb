@@ -1,0 +1,241 @@
+﻿@model OficinaWeb.Models.AppointmentViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css" />
+
+<h1>Create</h1>
+
+<h4>Appointment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" onsubmit="return validateForm()">
+            <div asp-validation-summary="ModelOnly" class="text-danger" id="errors"></div>
+
+
+            <div class="form-group">
+                <label asp-for="MechanicId" class="control-label"></label>
+                <select asp-for="MechanicId" class="form-control" asp-items="ViewBag.MechanicId"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="AppointmentType" class="control-label"></label>
+                <input asp-for="AppointmentType" class="form-control" />
+                <span asp-validation-for="AppointmentType" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Date" class="control-label"></label>
+                <ejs-datetimepicker id="Date"
+                                    format="dd-MM-yyyy HH:mm"
+                                    value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")"
+                                    asp-for="Date"
+                                    class="form-control">
+                </ejs-datetimepicker>
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="AppointmentEnd" class="control-label"></label>
+                <ejs-timepicker id="AppointmentEnd" asp-for="AppointmentEnd" format="HH:mm"></ejs-timepicker>
+                <span asp-validation-for="AppointmentEnd" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="SelectedClientName">Client</label>
+                <div class="input-group">
+                    <input type="text" id="SelectedClientName" class="form-control" placeholder="Select a client..." readonly />
+                    <input type="hidden" id="ClientId" name="ClientId" />
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#clientModal">
+                        Search
+                    </button>
+                </div>
+                <span asp-validation-for="ClientId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="VehicleId" class="control-label"></label>
+                <select asp-for="VehicleId" class="form-control" asp-items="ViewBag.VehicleId" disabled></select>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+
+
+<div class="modal fade" id="clientModal" >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientModalLabel">Select a Client</h5>
+                <button type="button" class="btn btn-close" data-bs-dismiss="modal" ></button>
+            </div>
+            <div class="modal-body">              
+                <div class="panel-body">
+                    <table class="table table-hover table-responsive table-striped" id="MyTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Client)
+                                </th>
+                                <th>
+                                    Email
+                                </th>
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(Model.Clients != null)
+                            {
+                                @foreach (var item in Model.Clients)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-success select-client" data-id="@item.Id" data-name="@item.Name">
+                                                Select
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+                                }
+                            }
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@using Newtonsoft.Json
+@using OficinaWeb.Data.Entities
+<script>
+    const appointments = @Html.Raw(JsonConvert.SerializeObject(Model.Appointments ?? new List<Appointment>()));
+</script>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable();           
+
+            $(".select-client").click(function () {
+                var clientId = $(this).data("id");
+                var clientName = $(this).data("name");
+
+                $("#ClientId").val(clientId);
+                $("#SelectedClientName").val(clientName);
+                $("#VehicleId").empty().prop("disabled", true);
+
+                $.ajax({
+                    url: '@Url.Action("GetVehiclesByClientId", "Vehicles")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { clientId: clientId },
+                    success: function (vehicles) {
+                        if (vehicles.length === 0) {
+                            $("#VehicleId").append('<option value="">No vehicles available</option>');
+                        } else {
+                            $("#VehicleId").append('<option value="">-- Select a vehicle --</option>');
+                            $.each(vehicles, function (i, vehicle) {
+                                $("#VehicleId").append(
+                                     '<option value="' + vehicle.id + '">' + vehicle.name + '</option>'
+                                );
+                            });
+                            $("#VehicleId").prop("disabled", false);
+                        }
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve vehicles. ' + ex.responseText);
+                    }
+                });
+
+
+                $("#clientModal").modal("hide");
+            });
+        });
+    </script>
+
+    <script>
+                        function validateForm() {
+            const selectedMechanicId = parseInt(document.querySelector('[name="MechanicId"]').value);
+
+            const datePicker = document.querySelector('[name="Date"]');
+            const startDateTime = datePicker.ej2_instances[0].value;
+
+            const timePickerInstance = document.getElementById("AppointmentEnd").ej2_instances[0];
+            const endTime = timePickerInstance.value;
+
+            if (!selectedMechanicId || !startDateTime || !endTime) {
+                return true; // Deixa passar se algum campo estiver vazio
+            }
+
+            // Extrair a data (dia/mes/ano) do agendamento
+            const appointmentDate = new Date(startDateTime.getFullYear(), startDateTime.getMonth(), startDateTime.getDate());
+
+            // Extrair startTime e endTime como TimeSpan (milissegundos desde 00:00)
+            const startTimeSpan = startDateTime.getHours() * 60 + startDateTime.getMinutes();
+            const endTimeSpan = endTime.getHours() * 60 + endTime.getMinutes();
+
+            for (let i = 0; i < appointments.length; i++) {
+                const appt = appointments[i];
+
+                if (appt.mechanicId !== selectedMechanicId) continue;
+
+                const apptStartDate = new Date(appt.date);
+                const apptDateOnly = new Date(apptStartDate.getFullYear(), apptStartDate.getMonth(), apptStartDate.getDate());
+
+                // Só compara se o dia for igual
+                if (appointmentDate.getTime() !== apptDateOnly.getTime()) continue;
+
+                // Extrair start e end como TimeSpan (minutos desde meia-noite)
+                const apptStartTime = apptStartDate.getHours() * 60 + apptStartDate.getMinutes();
+
+                const endParts = appt.appointmentEnd.split(':');
+                const apptEndTime = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+
+                const overlaps = (startTimeSpan < apptEndTime) && (endTimeSpan > apptStartTime);
+
+                if (overlaps) {
+                    const msg = `O mecânico já possui um agendamento em ${apptStartDate.toLocaleDateString()} das ${apptStartTime.toString().padStart(4, '0')} às ${apptEndTime.toString().padStart(4, '0')}.`;
+                    document.getElementById("errors").innerHTML = `<div class="text-danger">${msg}</div>`;
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    </script>
+
+
+}

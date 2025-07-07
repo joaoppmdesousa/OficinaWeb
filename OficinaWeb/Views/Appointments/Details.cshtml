@@ -1,0 +1,55 @@
+﻿@model OficinaWeb.Data.Entities.Appointment
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Appointment</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Mechanic)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Mechanic.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AppointmentType)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AppointmentType)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Date)
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.Date.ToString("dd-MM-yyyy")
+        </dd>
+        <dt class = "col-sm-2">
+            Time Slot
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.Date.ToString("HH:mm") / @Model.AppointmentEnd.ToString(@"hh\:mm")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Client)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Client.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Vehicle)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Vehicle.VehicleDescription)
+        </dd>
+       
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-success">Edit</a> 
+    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+</div>

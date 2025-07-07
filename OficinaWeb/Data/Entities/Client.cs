@@ -29,6 +29,10 @@ namespace OficinaWeb.Data.Entities
      
         public ICollection<RepairAndServices> RepairsAndServices { get; set; }
 
+        public ICollection<Appointment> Appointments { get; set; }
+
+
+
         public User User { get; set; }
 
 

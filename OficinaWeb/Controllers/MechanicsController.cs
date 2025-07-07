@@ -68,12 +68,6 @@ namespace OficinaWeb.Controllers
                 mechanic.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                 //TODO: modificar para o user que tiver logado
 
-                if (mechanic.ClockOut <= mechanic.ClockIn)
-                {
-                    ModelState.AddModelError("ClockOut", "Clock Out must be after Clock In.");
-                    return View(mechanic);
-                }
-
                 _context.Add(mechanic);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -116,12 +110,7 @@ namespace OficinaWeb.Controllers
                     mechanic.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                     //TODO: modificar para o user que tiver logado
 
-                    if (mechanic.ClockOut <= mechanic.ClockIn)
-                    {
-                        ModelState.AddModelError("ClockOut", "Clock Out must be after Clock In.");
-                        return View(mechanic);
-                    }
-
+              
                     _context.Update(mechanic);
                     await _context.SaveChangesAsync();
                 }

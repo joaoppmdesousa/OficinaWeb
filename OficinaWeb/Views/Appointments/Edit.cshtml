@@ -1,0 +1,184 @@
+﻿@model OficinaWeb.Models.AppointmentViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Appointment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label asp-for="MechanicId" class="control-label"></label>
+                <select asp-for="MechanicId" class="form-control" asp-items="ViewBag.MechanicId"></select>
+                <span asp-validation-for="MechanicId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="AppointmentType" class="control-label"></label>
+                <input asp-for="AppointmentType" class="form-control" />
+                <span asp-validation-for="AppointmentType" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Date" class="control-label"></label>
+                <ejs-datetimepicker id="Date"
+                                    format="dd-MM-yyyy HH:mm"
+                                    value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")"
+                                    asp-for="Date"
+                                    class="form-control">
+                </ejs-datetimepicker>
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="AppointmentEnd" class="control-label"></label>
+                <ejs-timepicker id="AppointmentEnd" asp-for="AppointmentEnd" format="HH:mm" value="@Model.AppointmentEnd.ToString(@"hh\:mm")"></ejs-timepicker>
+                <span asp-validation-for="AppointmentEnd" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label for="SelectedClientName">Client</label>
+                <div class="input-group">
+                    <input type="text" id="SelectedClientName" class="form-control" placeholder="Select a client..." readonly value="@Model.Client.Name" />
+                    <input type="hidden" id="ClientId" name="ClientId" value="@Model.ClientId" />
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#clientModal">
+                        Search
+                    </button>
+                </div>
+                <span asp-validation-for="ClientId" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="VehicleId" class="control-label"></label>
+                <select asp-for="VehicleId" class="form-control" asp-items="ViewBag.VehicleId"></select>
+                <span asp-validation-for="VehicleId" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-outline-success" />
+                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="clientModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientModalLabel">Select a Client</h5>
+                <button type="button" class="btn btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="panel-body">
+                    <table class="table table-hover table-responsive table-striped" id="MyTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Client)
+                                </th>
+                                <th>
+                                    Email
+                                </th>
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Clients != null)
+                            {
+                                @foreach (var item in Model.Clients)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-success select-client" data-id="@item.Id" data-name="@item.Name">
+                                                Select
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+                                }
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable();           
+
+            $(".select-client").click(function () {
+                var clientId = $(this).data("id");
+                var clientName = $(this).data("name");
+
+                $("#ClientId").val(clientId);
+                $("#SelectedClientName").val(clientName);
+                $("#VehicleId").empty().prop("disabled", true);
+
+                $.ajax({
+                    url: '@Url.Action("GetVehiclesByClientId", "Vehicles")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { clientId: clientId },
+                    success: function (vehicles) {
+                        if (vehicles.length === 0) {
+                            $("#VehicleId").append('<option value="">No vehicles available</option>');
+                        } else {
+                            $("#VehicleId").append('<option value="">-- Select a vehicle --</option>');
+                            $.each(vehicles, function (i, vehicle) {
+                                $("#VehicleId").append(
+                                     '<option value="' + vehicle.id + '">' + vehicle.name + '</option>'
+                                );
+                            });
+                            $("#VehicleId").prop("disabled", false);
+                        }
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve vehicles. ' + ex.responseText);
+                    }
+                });
+
+
+                $("#clientModal").modal("hide");
+            });
+        });
+    </script>
+
+    }

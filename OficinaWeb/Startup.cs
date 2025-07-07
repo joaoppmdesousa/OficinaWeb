@@ -63,28 +63,8 @@ namespace OficinaWeb
             services.AddScoped<IMechanicRepository, MechanicRepository>();
             services.AddScoped<IRepairAndServicesRepository, RepairAndServicesRepository>();
             services.AddScoped<IPartsRepository, PartsRepository>();
-
-
-            services.Configure<RequestLocalizationOptions>(options =>
-            {
-                var supportedCultures = new[]
-                {
-           
-           
-            new CultureInfo("en-US"), 
-            new CultureInfo("pt-PT")  
-                 };
-
-               
-                options.DefaultRequestCulture = new RequestCulture("en-US");
-
-                
-                options.SupportedCultures = supportedCultures;
-                options.SupportedUICultures = supportedCultures;
-
-              
-                options.ApplyCurrentCultureToResponseHeaders = true;
-            });
+            services.AddScoped<IAppointmentsRepository, AppointmentsRepository>();
+            services.AddScoped<IConverterHelper, ConverterHelper>();      
 
 
 
@@ -106,16 +86,7 @@ namespace OficinaWeb
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-            var defaultCulture = new CultureInfo("en-US");
-            var localizationOptions = new RequestLocalizationOptions
-            {
-                DefaultRequestCulture = new RequestCulture(defaultCulture),
-                SupportedCultures = new List<CultureInfo> { defaultCulture },
-                SupportedUICultures = new List<CultureInfo> { defaultCulture },
-                ApplyCurrentCultureToResponseHeaders = true
-            };
-            app.UseRequestLocalization(localizationOptions);
+          
 
             app.UseRouting();
 
