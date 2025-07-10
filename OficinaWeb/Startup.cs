@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
@@ -17,6 +18,8 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using Microsoft.CodeAnalysis.FlowAnalysis;
+using System.Text;
 
 namespace OficinaWeb
 {
@@ -36,6 +39,8 @@ namespace OficinaWeb
 
             services.AddIdentity<User, IdentityRole>(cfg =>
             {
+                cfg.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+                cfg.SignIn.RequireConfirmedEmail = true;
                 cfg.User.RequireUniqueEmail = true;
                 cfg.Password.RequireDigit = false;
                 cfg.Password.RequiredLength = 6;
@@ -48,7 +53,18 @@ namespace OficinaWeb
               .AddDefaultTokenProviders()
               .AddEntityFrameworkStores<DataContext>();
 
-            
+            services.AddAuthentication()
+                 .AddCookie()
+                 .AddJwtBearer(cfg =>
+                 {
+                     cfg.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidIssuer = this.Configuration["Tokens:Issuer"],
+                         ValidAudience = this.Configuration["Tokens:Audience"],
+                         IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(this.Configuration["Tokens:Key"]))
+                     };
+                 });
 
             services.AddDbContext<DataContext>(cfg =>
                 cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -56,6 +72,9 @@ namespace OficinaWeb
             services.AddTransient<SeedDb>();
 
             services.AddScoped<IUserHelper, UserHelper>();
+            services.AddScoped<IConverterHelper, ConverterHelper>();
+            services.AddScoped<IEmailHelper, EmailHelper>();
+
 
 
             services.AddScoped<IClientRepository, ClientRepository>();
@@ -64,7 +83,7 @@ namespace OficinaWeb
             services.AddScoped<IRepairAndServicesRepository, RepairAndServicesRepository>();
             services.AddScoped<IPartsRepository, PartsRepository>();
             services.AddScoped<IAppointmentsRepository, AppointmentsRepository>();
-            services.AddScoped<IConverterHelper, ConverterHelper>();      
+                 
 
 
 

@@ -41,7 +41,6 @@ namespace OficinaWeb.Data.Entities
 
         [Required]
         [Display(Name = "Price")]
-        [Column(TypeName = "decimal(18, 2)")]
         public decimal ServicePrice { get; set; }
 
  

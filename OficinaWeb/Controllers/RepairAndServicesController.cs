@@ -10,6 +10,8 @@ using OficinaWeb.Data.Entities;
 
 namespace OficinaWeb.Controllers
 {
+
+    //TODO: Serviceprice ainda atrofia com a " , "
     public class RepairAndServicesController : Controller
     {
         private readonly DataContext _context;
@@ -109,8 +111,8 @@ namespace OficinaWeb.Controllers
             {
                 return NotFound();
             }
-           
 
+            
 
             return View(repairAndServices);
         }
@@ -122,13 +124,14 @@ namespace OficinaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, RepairAndServices repairAndServices)
         {
+
+            Console.WriteLine(System.Globalization.CultureInfo.CurrentCulture);
+
             if (id != repairAndServices.Id)
             {
                 return NotFound();
             }
-
-            // Log para depuração
-            Console.WriteLine($"MechanicIds recebidos: {string.Join(", ", repairAndServices.MechanicIds ?? new List<int>())}");
+          
 
             if (ModelState.IsValid)
             {

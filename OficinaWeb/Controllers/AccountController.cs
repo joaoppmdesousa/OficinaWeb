@@ -3,12 +3,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
 using OficinaWeb.Models;
+using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
@@ -16,11 +22,22 @@ namespace OficinaWeb.Controllers
     public class AccountController : Controller
     {
         private readonly IUserHelper _userHelper;
-        private IClientRepository _clientRepository;
+        private readonly IEmailHelper _emailHelper;
+        private readonly IConverterHelper _converterHelper;
+        private readonly IConfiguration _configuration;
+        private readonly IClientRepository _clientRepository;
 
-        public AccountController(IUserHelper userHelper, IClientRepository clientRepository)
+        public AccountController(
+            IUserHelper userHelper,
+            IEmailHelper emailHelper,
+            IConverterHelper converterHelper,
+            IConfiguration configuration,
+            IClientRepository clientRepository)
         {
             _userHelper = userHelper;
+            _emailHelper = emailHelper;
+            _converterHelper = converterHelper;
+            _configuration = configuration;
             _clientRepository = clientRepository;
         }
 
@@ -89,7 +106,6 @@ namespace OficinaWeb.Controllers
             {
                 new SelectListItem { Text = "Admin", Value = "Admin" },
                 new SelectListItem { Text = "Employee", Value = "Employee" },
-                new SelectListItem { Text = "Client", Value = "Client" }
             };
 
             if (ModelState.IsValid)
@@ -111,25 +127,25 @@ namespace OficinaWeb.Controllers
                         return View(model);
                     }
 
-                    var loginViewModel = new LoginViewModel
-                    {
-                        Username = model.Username,
-                        Password = model.Password,
-                        RememberMe = false
-                    };
 
                     await _userHelper.AddUserToRoleAsync(user, model.Role);
 
-                    if (model.Role == "Client")
-                    {
-                        return RedirectToAction("AssociateClientToUser", new { userId = user.Id });
-                    }
 
-
-                    var result2 = await _userHelper.LoginAsync(loginViewModel);
-                    if (result2.Succeeded)
+                    string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                    string tokenLink = Url.Action("ConfirmEmail", "Account", new
                     {
-                        return RedirectToAction("Index", "Home");
+                        userId = user.Id,
+                        token = myToken
+                    }, protocol: HttpContext.Request.Scheme);
+
+                    Response response = _emailHelper.SendEmail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+                        $"To allow the user, " +
+                        $"please click in this link:</br></br><a href = \"{tokenLink}\">Confirm Email</a>");
+                   
+                    if (response.IsSuccess)
+                    {
+                        ViewBag.Message = "The intructions to allow you user has been sent to email";
+                        return View(model);
                     }
 
                     ModelState.AddModelError(string.Empty, "Failed to login.");
@@ -139,8 +155,7 @@ namespace OficinaWeb.Controllers
             ViewBag.Roles = new List<SelectListItem>
             {
                 new SelectListItem { Text = "Admin", Value = "Admin" },
-                new SelectListItem { Text = "Employee", Value = "Employee" },
-                new SelectListItem { Text = "Client", Value = "Client" }
+                new SelectListItem { Text = "Employee", Value = "Employee" }
             };
 
             return View(model);
@@ -218,7 +233,143 @@ namespace OficinaWeb.Controllers
             return this.View(model);
         }
 
-        
+
+
+        [HttpPost]
+        public async Task<IActionResult> CreateToken([FromBody] LoginViewModel model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(model.Username);
+                if (user != null)
+                {
+                    
+                    if (await _userHelper.IsUserInRoleAsync(user, "Client"))
+                    {
+                       
+                        bool isDefaultPassword = await _userHelper.CheckPasswordAsync(user, "defaultpassclient");
+                        if (isDefaultPassword)
+                        {
+                            return BadRequest("You must set your password before logging in.");
+                        }
+                    }
+
+                    var result = await _userHelper.ValidatePasswordAsync(
+                        user,
+                        model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        var claims = new[]
+                        {
+                            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                        };
+
+                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
+                        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                        var token = new JwtSecurityToken(
+                            _configuration["Tokens:Issuer"],
+                            _configuration["Tokens:Audience"],
+                            claims,
+                            expires: DateTime.UtcNow.AddDays(15),
+                            signingCredentials: credentials);
+                        var results = new
+                        {
+                            token = new JwtSecurityTokenHandler().WriteToken(token),
+                            expiration = token.ValidTo
+                        };
+
+                        return this.Created(string.Empty, results);
+
+                    }
+                }
+            }
+
+            return BadRequest();
+        }
+
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return NotFound();
+            }
+
+            var user = await _userHelper.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userHelper.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            return View();
+        }
+
+
+        public async Task<IActionResult> SetPassword(string userId, string token)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return NotFound();
+            }
+
+            var user = await _userHelper.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userHelper.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            var model = new SetPasswordViewModel { UserId = userId };
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> SetPassword(SetPasswordViewModel model)
+        {           
+
+            if (ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByIdAsync(model.UserId);
+                if (user != null)
+                {
+                    var result = await _userHelper.SetPasswordAsync(user, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return this.RedirectToAction("Login");
+                    }
+                    else
+                    {
+                        this.ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
+                    }
+                }
+                else
+                {
+                    this.ModelState.AddModelError(string.Empty, "User not found.");
+                }
+            }
+
+            return this.View(model);
+        }
+
+
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateUserForClient(int clientId)
@@ -229,7 +380,7 @@ namespace OficinaWeb.Controllers
             var existingUser = await _userHelper.GetUserByEmailAsync(client.Email);
             if (existingUser != null)
             {
-                TempData["Error"] = "Já existe um usuário com esse email.";
+                TempData["Error"] = "There is already a client with that email";
                 return RedirectToAction("AdminClientList", "Clients");
             }
 
@@ -241,12 +392,33 @@ namespace OficinaWeb.Controllers
                 PhoneNumber = client.Contact,
             };
 
-            var result = await _userHelper.AddUserAsync(user, "123456"); //TODO Senha padrão, deve ser alterada posteriormente
+            var result = await _userHelper.AddUserAsync(user, "defaultpassclient"); //TODO Senha padrão, deve ser alterada posteriormente
 
             if (result.Succeeded)
             {
                 await _userHelper.AddUserToRoleAsync(user, "Client");
-                TempData["Success"] = "Usuário criado com sucesso.";
+
+                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+
+                var model = _converterHelper.ToRegisterNewUserViewModel(user, "Client");
+
+                string tokenLink = Url.Action("SetPassword", "Account", new
+                    {
+                        userId = user.Id,
+                        token = myToken
+                    }, protocol: HttpContext.Request.Scheme);
+
+                    Response response = _emailHelper.SendEmail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+                        $"To allow the user, " +
+                        $"you will need to set your password,please click in this link:</br></br><a href = \"{tokenLink}\">Set Password</a>");
+                   
+                    if (response.IsSuccess)
+                    {
+                        ViewBag.Message = "The intructions to allow the user has been sent to users email";
+                        return RedirectToAction("AdminClientList", "Clients");
+                }
+
+                TempData["Success"] = "User created Successfully.";
             }
             else
             {

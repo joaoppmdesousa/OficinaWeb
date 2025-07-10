@@ -39,5 +39,17 @@ namespace OficinaWeb.Helpers
 
             };
         }
+
+        public RegisterNewUserViewModel ToRegisterNewUserViewModel(User user, string role)
+        {
+            return new RegisterNewUserViewModel
+            {
+                Name = user.Name,
+                Username = user.UserName,
+                Password = user.PasswordHash,
+                ConfirmPassword = user.PasswordHash,
+                Role = role
+            };
+        }
     }
 }

@@ -10,5 +10,9 @@ namespace OficinaWeb.Helpers
         Appointment ToAppointment(AppointmentViewModel model, bool isNew);
 
         AppointmentViewModel ToAppointmentViewModel(Appointment appointment);
+
+
+        RegisterNewUserViewModel ToRegisterNewUserViewModel(User user, string role);
+
     }
 }

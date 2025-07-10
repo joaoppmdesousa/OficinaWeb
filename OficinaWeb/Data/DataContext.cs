@@ -39,22 +39,25 @@ namespace OficinaWeb.Data
                     fk.DeleteBehavior = DeleteBehavior.Restrict;
                 }
 
+
+
+
                 modelBuilder.Entity<RepairAndServices>()
                .HasOne(r => r.Client)
                .WithMany(c => c.RepairsAndServices) 
                .HasForeignKey(r => r.ClientId)
                .OnDelete(DeleteBehavior.Restrict);
 
-
+            modelBuilder.Entity<RepairAndServices>()
+               .Property(p => p.ServicePrice)
+               .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Part>()
                 .Property(p => p.UnitPrice)
                 .HasColumnType("decimal(18,2)");
 
 
-            modelBuilder.Entity<RepairAndServices>()
-               .Property(p => p.ServicePrice)
-               .HasColumnType("decimal(18,2)");
+            
 
 
             base.OnModelCreating(modelBuilder);
