@@ -7,6 +7,9 @@ namespace OficinaWeb.Data
     public interface IMechanicRepository : IGenericRepository<Mechanic>
     {
 
-        Task<List<Mechanic>> GetByIdsAsync(IEnumerable<int> ids);        
+        Task<List<Mechanic>> GetByIdsAsync(IEnumerable<int> ids);
+
+        public Task<Mechanic> GetByIdAsyncWithIncludes(int id);
+
     }
 }

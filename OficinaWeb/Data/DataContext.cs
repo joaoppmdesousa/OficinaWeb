@@ -19,6 +19,17 @@ namespace OficinaWeb.Data
 
         public DbSet<Part> Parts { get; set; }
 
+        public DbSet<MechanicSpecialty> Specialties { get; set; }
+
+        public DbSet<Appointment> Appointments { get; set; }
+
+        public DbSet<CarBrand> CarBrands { get; set; }
+
+        public DbSet<CarModel> CarModels { get; set; }
+
+
+
+
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
         }
@@ -65,6 +76,8 @@ namespace OficinaWeb.Data
         }
             
         public DbSet<OficinaWeb.Data.Entities.Appointment> Appointment { get; set; }
+            
+        public DbSet<OficinaWeb.Data.Entities.CarBrand> CarBrand { get; set; }
      
 
 

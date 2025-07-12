@@ -14,5 +14,10 @@ namespace OficinaWeb.Helpers
 
         RegisterNewUserViewModel ToRegisterNewUserViewModel(User user, string role);
 
+
+        Vehicle ToVehicle(VehicleViewModel model, bool isNew);
+
+        VehicleViewModel ToVehicleViewModel(Vehicle vehicle);
+
     }
 }

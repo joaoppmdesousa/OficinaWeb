@@ -9,5 +9,7 @@ namespace OficinaWeb.Data
     public interface IVehicleRepository : IGenericRepository<Vehicle>
     {   
         public Task<Client> GetClientAsync(int clientId);
+
+        public Task<Vehicle> GetByIdAsyncWithIncludes(int id);
     }
 }

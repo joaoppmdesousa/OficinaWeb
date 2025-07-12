@@ -17,10 +17,10 @@
                 @Html.DisplayNameFor(model => model.LicensePlate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Brand)
+                @Html.DisplayNameFor(model => model.CarBrand)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Model)
+                @Html.DisplayNameFor(model => model.CarModel)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Year)
@@ -41,10 +41,10 @@
                 @Html.DisplayFor(modelItem => item.LicensePlate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Brand)
+                @Html.DisplayFor(modelItem => item.CarBrand.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Model)
+                @Html.DisplayFor(modelItem => item.CarModel.Name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Year)

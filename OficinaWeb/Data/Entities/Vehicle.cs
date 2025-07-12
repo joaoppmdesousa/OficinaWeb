@@ -14,12 +14,19 @@ namespace OficinaWeb.Data.Entities
         public string LicensePlate { get; set; }
 
         [Required]
-        [MaxLength(20)]
-        public string Brand { get; set; }
+        [Display(Name = "Car Brand")]
+        public int CarBrandId { get; set; }
+
+        
+        public CarBrand CarBrand { get; set; }
 
         [Required]
-        [MaxLength(20)]
-        public string Model { get; set; }
+        [Display(Name = "Car Model")]
+        public int CarModelId { get; set; }
+
+       
+ 
+        public CarModel CarModel { get; set; }
 
 
         [Required]
@@ -47,7 +54,7 @@ namespace OficinaWeb.Data.Entities
 
 
 
-        public string VehicleDescription => $"{Brand} {Model}, {LicensePlate}";
+        public string VehicleDescription => $"{CarBrand} {CarModel}, {LicensePlate}";
 
 
 

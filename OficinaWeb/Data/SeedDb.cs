@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OficinaWeb.Data
@@ -20,6 +22,7 @@ namespace OficinaWeb.Data
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
+            
 
             await _userHelper.CheckRoleAsync("Admin");
             await _userHelper.CheckRoleAsync("Client");
@@ -54,6 +57,16 @@ namespace OficinaWeb.Data
             if (!isInRole)
             {
                 await _userHelper.AddUserToRoleAsync(user, "Admin");
+            }
+
+
+            if (!_context.Specialties.Any())
+            {
+                _context.Specialties.Add(new MechanicSpecialty { Name = "Engine Specialist" });
+                _context.Specialties.Add(new MechanicSpecialty { Name = "Brake Technician" });
+                _context.Specialties.Add(new MechanicSpecialty { Name = "Electrical Specialist" });
+
+                await _context.SaveChangesAsync();
             }
 
         }

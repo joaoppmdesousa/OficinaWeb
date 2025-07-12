@@ -19,15 +19,24 @@ namespace OficinaWeb.Controllers
         private readonly IVehicleRepository _vehicleRepository;
         private readonly IUserHelper _userHelper;
         private readonly IClientRepository _clientRepository;
+        private readonly ICarBrandRepository _carBrandRepository;
+        private readonly ICarModelRepository _carModelRepository;
+        private readonly IConverterHelper _converterHelper;
 
         public VehiclesController(
             IVehicleRepository vehicleRepository,
             IUserHelper userHelper,
-            IClientRepository clientRepository)
+            IClientRepository clientRepository,
+            ICarBrandRepository carBrandRepository,
+            ICarModelRepository carModelRepository,
+            IConverterHelper converterHelper)
         {
             _vehicleRepository = vehicleRepository;
             _userHelper = userHelper;
             _clientRepository = clientRepository;
+            _carBrandRepository = carBrandRepository;
+            _carModelRepository = carModelRepository;
+            _converterHelper = converterHelper;
         }
 
         // GET: Vehicles
@@ -48,8 +57,12 @@ namespace OficinaWeb.Controllers
             ViewBag.ClientId = client.Id;
             var vehicles = _vehicleRepository
            .GetAll()
+           .Include(v => v.CarBrand)
+           .Include(v => v.CarModel)
            .Where(v => v.ClientId == clientId.Value)
-           .OrderBy(v => v.Model);
+           .OrderBy(v => v.CarModel);
+
+           
 
             return View(vehicles);
         }
@@ -89,12 +102,15 @@ namespace OficinaWeb.Controllers
 
             ViewBag.ClientId = client.Id;
 
-            var vehicle = new Vehicle
+            var model = new VehicleViewModel
             {
-                ClientId = clientId.Value
+                ClientId = clientId.Value,
+                CarBrands = await _carBrandRepository.GetAll().ToListAsync()
             };
 
-            return View(vehicle);
+            ViewData["Brands"] = new SelectList(model.CarBrands, "Id", "Name");
+
+            return View(model);
         }
 
         // POST: Vehicles/Create
@@ -102,19 +118,22 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Vehicle vehicle)
+        public async Task<IActionResult> Create(VehicleViewModel model)
         {
 
             if (ModelState.IsValid)
-            {
-                vehicle.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                //TODO: modificar para o user que tiver logado
-
+            {             
+                var vehicle = _converterHelper.ToVehicle(model, true);
                 await _vehicleRepository.CreateAsync(vehicle);
                 return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
             }
 
-            return View(vehicle);
+            model.CarBrands = await _carBrandRepository.GetAll().ToListAsync();
+
+            ViewData["Brands"] = new SelectList(model.CarBrands, "Id", "Name");
+
+
+            return View(model);
         }
 
         // GET: Vehicles/Edit/5
@@ -125,7 +144,7 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var vehicle = await _vehicleRepository.GetIdAsync(id.Value);
+            var vehicle = await _vehicleRepository.GetByIdAsyncWithIncludes(id.Value);
             if (vehicle == null)
             {
                 return NotFound();
@@ -133,7 +152,19 @@ namespace OficinaWeb.Controllers
 
             ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "Vehicles", new { clientId = vehicle.ClientId });
 
-            return View(vehicle);
+            var model = _converterHelper.ToVehicleViewModel(vehicle);
+
+            model.CarBrands = await _carBrandRepository.GetAll().ToListAsync();
+
+            ViewData["Brands"] = new SelectList(model.CarBrands, "Id", "Name", model.CarBrand);
+
+            var models = await _carModelRepository.GetAll()
+             .Where(m => m.CarBrandId == model.CarBrandId)
+             .ToListAsync();
+
+            ViewBag.Models = new SelectList(models, "Id", "Name", model.CarModel);
+
+            return View(model);
         }
 
         // POST: Vehicles/Edit/5
@@ -141,21 +172,22 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,LicensePlate,Brand,Model,Year,Mileage,FuelType,ClientId")] Vehicle vehicle)
+        public async Task<IActionResult> Edit(int id, VehicleViewModel model)
         {
-            if (id != vehicle.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
+                var vehicle = _converterHelper.ToVehicle(model, false);
+
                 try
-                {
-                    vehicle.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                    //TODO: modificar para o user que tiver logado
+                {              
 
                     await _vehicleRepository.UpdateAsync(vehicle);
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -168,9 +200,20 @@ namespace OficinaWeb.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
             }
-            return View(vehicle);
+
+            model.CarBrands = await _carBrandRepository.GetAll().ToListAsync();
+
+            var models = await _carModelRepository.GetAll()
+            .Where(m => m.CarBrandId == model.CarBrandId)
+             .ToListAsync();
+
+            ViewBag.Models = new SelectList(models, "Id", "Name", model.CarModel);
+
+            model.CarBrand = await _carBrandRepository.GetIdAsync(model.CarBrandId);
+
+            return View(model);
         }
 
         // GET: Vehicles/Delete/5
@@ -216,7 +259,7 @@ namespace OficinaWeb.Controllers
 
             var vehicles = await _vehicleRepository.GetAll()
                 .Where(v => v.ClientId == client.Id)
-                .OrderBy(v => v.Model)
+                .OrderBy(v => v.CarModel)
                 .ToListAsync();
 
             if (vehicles != null)
@@ -241,7 +284,7 @@ namespace OficinaWeb.Controllers
                 .Select(v => new
                 {
                     id = v.Id,
-                    name = v.Brand + " " + v.Model + " (" + v.LicensePlate + ")"
+                    name = v.CarBrand + " " + v.CarModel + " (" + v.LicensePlate + ")"
                 })
                 .ToList();
 
@@ -249,6 +292,21 @@ namespace OficinaWeb.Controllers
 
 
 
+        }
+
+
+
+        [HttpGet]
+        public IActionResult GetCarModelsByBrand(int brandId)
+        {
+            var carModels = _carModelRepository
+                .GetAll()
+                .Where(m => m.CarBrandId == brandId)
+                .OrderBy(m => m.Name)
+                .Select(m => new { m.Id, m.Name })
+                .ToList();
+
+            return Json(carModels);
         }
 
     }

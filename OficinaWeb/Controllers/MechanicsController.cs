@@ -16,20 +16,23 @@ namespace OficinaWeb.Controllers
     public class MechanicsController : Controller
     {
         private readonly DataContext _context;
+        private readonly IMechanicRepository _mechanicRepository;
         private readonly IUserHelper _userHelper;
 
         public MechanicsController(
             DataContext context,
+            IMechanicRepository mechanicRepository,
             IUserHelper userHelper)
         {
             _context = context;
+            _mechanicRepository = mechanicRepository;
             _userHelper = userHelper;
         }
 
         // GET: Mechanics
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Mechanics.ToListAsync());
+            return View(_mechanicRepository.GetAll().Include(a => a.MechanicSpecialty));
         }
 
         // GET: Mechanics/Details/5
@@ -40,8 +43,7 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var mechanic = await _context.Mechanics
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var mechanic = await _mechanicRepository.GetByIdAsyncWithIncludes(id.Value);
             if (mechanic == null)
             {
                 return NotFound();
@@ -53,6 +55,9 @@ namespace OficinaWeb.Controllers
         // GET: Mechanics/Create
         public IActionResult Create()
         {
+
+            ViewData["MechanicSpecialtyId"] = new SelectList(_context.Specialties, "Id", "Name");
+
             return View();
         }
 
@@ -61,17 +66,16 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Specialty,ProfessionalContact,ClockIn,ClockOut,Active")] Mechanic mechanic)
+        public async Task<IActionResult> Create( Mechanic mechanic)
         {
             if (ModelState.IsValid)
             {
-                mechanic.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                //TODO: modificar para o user que tiver logado
-
-                _context.Add(mechanic);
-                await _context.SaveChangesAsync();
+                await _mechanicRepository.CreateAsync(mechanic);
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["MechanicSpecialtyId"] = new SelectList(_context.Specialties, "Id", "Name");
+
             return View(mechanic);
         }
 
@@ -83,11 +87,14 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var mechanic = await _context.Mechanics.FindAsync(id);
+            var mechanic = await _mechanicRepository.GetIdAsync(id.Value);
             if (mechanic == null)
             {
                 return NotFound();
             }
+
+            ViewData["MechanicSpecialtyId"] = new SelectList(_context.Specialties, "Id", "Name", mechanic.MechanicSpecialtyId);
+
             return View(mechanic);
         }
 
@@ -96,7 +103,7 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Specialty,ProfessionalContact,ClockIn,ClockOut,Active")] Mechanic mechanic)
+        public async Task<IActionResult> Edit(int id, Mechanic mechanic)
         {
             if (id != mechanic.Id)
             {
@@ -107,16 +114,12 @@ namespace OficinaWeb.Controllers
             {
                 try
                 {
-                    mechanic.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                    //TODO: modificar para o user que tiver logado
 
-              
-                    _context.Update(mechanic);
-                    await _context.SaveChangesAsync();
+                    await _mechanicRepository.UpdateAsync(mechanic);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MechanicExists(mechanic.Id))
+                    if (!await _mechanicRepository.ExistsAsync(id))
                     {
                         return NotFound();
                     }
@@ -127,6 +130,9 @@ namespace OficinaWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["MechanicSpecialtyId"] = new SelectList(_context.Specialties, "Id", "Name", mechanic.MechanicSpecialtyId);
+
             return View(mechanic);
         }
 
@@ -138,8 +144,7 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            var mechanic = await _context.Mechanics
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var mechanic = await _mechanicRepository.GetIdAsync(id.Value);
             if (mechanic == null)
             {
                 return NotFound();
@@ -153,9 +158,8 @@ namespace OficinaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var mechanic = await _context.Mechanics.FindAsync(id);
-            _context.Mechanics.Remove(mechanic);
-            await _context.SaveChangesAsync();
+            var mechanic = await _mechanicRepository.GetIdAsync(id);
+            await _mechanicRepository.DeleteAsync(mechanic);
             return RedirectToAction(nameof(Index));
         }
 
@@ -163,7 +167,7 @@ namespace OficinaWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchMechanics(string search)
         {
-            var mechanics = await _context.Mechanics
+            var mechanics = await _mechanicRepository.GetAll()
                 .Where(m => string.IsNullOrEmpty(search) || m.Name.Contains(search))
                 .Select(m => new
                 {
@@ -176,9 +180,5 @@ namespace OficinaWeb.Controllers
         }
 
 
-        private bool MechanicExists(int id)
-        {
-            return _context.Mechanics.Any(e => e.Id == id);
-        }
     }
 }

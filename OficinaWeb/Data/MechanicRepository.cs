@@ -15,6 +15,14 @@ namespace OficinaWeb.Data
             _context = context;
         }
 
+        public async Task<Mechanic> GetByIdAsyncWithIncludes(int id)
+        {
+            return await _context.Mechanics
+               .Include(a => a.MechanicSpecialty)
+               .AsNoTracking()
+               .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
         public async Task<List<Mechanic>> GetByIdsAsync(IEnumerable<int> ids)
         {
             return await _context.Mechanics

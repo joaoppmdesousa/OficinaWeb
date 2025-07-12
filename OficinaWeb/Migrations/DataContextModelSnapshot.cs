@@ -202,6 +202,45 @@ namespace OficinaWeb.Migrations
                     b.ToTable("Appointment");
                 });
 
+            modelBuilder.Entity("OficinaWeb.Data.Entities.CarBrand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CarBrand");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.CarModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CarBrandId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarBrandId");
+
+                    b.ToTable("CarModels");
+                });
+
             modelBuilder.Entity("OficinaWeb.Data.Entities.Client", b =>
                 {
                     b.Property<int>("Id")
@@ -253,6 +292,9 @@ namespace OficinaWeb.Migrations
                     b.Property<TimeSpan>("ClockOut")
                         .HasColumnType("time");
 
+                    b.Property<int>("MechanicSpecialtyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -262,19 +304,32 @@ namespace OficinaWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Specialty")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MechanicSpecialtyId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Mechanics");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.MechanicSpecialty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Specialties");
                 });
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.Part", b =>
@@ -413,10 +468,11 @@ namespace OficinaWeb.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<int>("CarBrandId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CarModelId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
@@ -433,11 +489,6 @@ namespace OficinaWeb.Migrations
                     b.Property<int>("Mileage")
                         .HasColumnType("int");
 
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -445,6 +496,10 @@ namespace OficinaWeb.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CarBrandId");
+
+                    b.HasIndex("CarModelId");
 
                     b.HasIndex("ClientId");
 
@@ -546,6 +601,17 @@ namespace OficinaWeb.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("OficinaWeb.Data.Entities.CarModel", b =>
+                {
+                    b.HasOne("OficinaWeb.Data.Entities.CarBrand", "CarBrand")
+                        .WithMany("CarModels")
+                        .HasForeignKey("CarBrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CarBrand");
+                });
+
             modelBuilder.Entity("OficinaWeb.Data.Entities.Client", b =>
                 {
                     b.HasOne("OficinaWeb.Data.Entities.User", "User")
@@ -557,9 +623,17 @@ namespace OficinaWeb.Migrations
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.Mechanic", b =>
                 {
+                    b.HasOne("OficinaWeb.Data.Entities.MechanicSpecialty", "MechanicSpecialty")
+                        .WithMany()
+                        .HasForeignKey("MechanicSpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("OficinaWeb.Data.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("MechanicSpecialty");
 
                     b.Navigation("User");
                 });
@@ -596,6 +670,18 @@ namespace OficinaWeb.Migrations
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.Vehicle", b =>
                 {
+                    b.HasOne("OficinaWeb.Data.Entities.CarBrand", "CarBrand")
+                        .WithMany()
+                        .HasForeignKey("CarBrandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OficinaWeb.Data.Entities.CarModel", "CarModel")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("CarModelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("OficinaWeb.Data.Entities.Client", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
@@ -606,9 +692,23 @@ namespace OficinaWeb.Migrations
                         .WithMany()
                         .HasForeignKey("UserId");
 
+                    b.Navigation("CarBrand");
+
+                    b.Navigation("CarModel");
+
                     b.Navigation("Client");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.CarBrand", b =>
+                {
+                    b.Navigation("CarModels");
+                });
+
+            modelBuilder.Entity("OficinaWeb.Data.Entities.CarModel", b =>
+                {
+                    b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("OficinaWeb.Data.Entities.Client", b =>

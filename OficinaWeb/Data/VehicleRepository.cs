@@ -22,5 +22,15 @@ namespace OficinaWeb.Data
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == clientId);
         }
+
+        public async Task<Vehicle> GetByIdAsyncWithIncludes(int id)
+        {
+            return await _context.Vehicles
+                .Include(a => a.CarBrand)
+                .Include(a => a.CarModel)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
     }
 }

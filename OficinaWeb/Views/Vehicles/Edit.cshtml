@@ -1,4 +1,4 @@
-﻿@model OficinaWeb.Data.Entities.Vehicle
+﻿@model OficinaWeb.Models.VehicleViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -19,14 +19,20 @@
                 <span asp-validation-for="LicensePlate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Brand" class="control-label"></label>
-                <input asp-for="Brand" class="form-control" />
-                <span asp-validation-for="Brand" class="text-danger"></span>
+                <label for="SelectedBrandName">Brand</label>
+                <div class="input-group">
+                    <input type="text" id="SelectedBrandName" class="form-control" placeholder="Select a brand..." readonly value="@Model.CarBrand?.Name" />
+                    <input type="hidden" id="CarBrandId" name="CarBrandId" value="@Model.CarBrandId" />
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#brandModal">
+                        Search
+                    </button>
+                </div>
+                <span asp-validation-for="CarBrandId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Model" class="control-label"></label>
-                <input asp-for="Model" class="form-control" />
-                <span asp-validation-for="Model" class="text-danger"></span>
+                <label asp-for="CarModelId" class="control-label"></label>
+                <select asp-for="CarModelId" class="form-control" asp-items="@ViewBag.Models"></select>
+                <span asp-validation-for="CarModelId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Year" class="control-label"></label>
@@ -56,6 +62,106 @@
 </div>
 
 
+
+
+<div class="modal fade" id="brandModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select a Brand</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="panel-body">
+                    <table class="table table-hover table-responsive table-striped" id="MyTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.CarBrandId)
+                                </th>
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.CarBrands != null)
+                            {
+                                @foreach (var item in Model.CarBrands)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-success select-brand" data-id="@item.Id" data-name="@item.Name">
+                                                Select
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+                                }
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+
+
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable();
+
+            $(".select-brand").click(function () {
+                var brandId = $(this).data("id");
+                var brandName = $(this).data("name");
+
+                $("#CarBrandId").val(brandId);
+                $("#SelectedBrandName").val(brandName);
+                $("#CarModelId").empty().prop("disabled", true);
+
+                $.ajax({
+                    url: '@Url.Action("GetCarModelsByBrand", "Vehicles")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { brandId: brandId },
+                    success: function (models) {
+                        if (models.length === 0) {
+                            $("#CarModelId").append('<option value="">No models available</option>');
+                        } else {
+                            $("#CarModelId").append('<option value="">-- Select a model --</option>');
+                            $.each(models, function (i, model) {
+                                $("#CarModelId").append(
+                                     '<option value="' + model.id + '">' + model.name + '</option>'
+                                );
+                            });
+                            $("#CarModelId").prop("disabled", false);
+                        }
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve models. ' + ex.responseText);
+                    }
+                });
+
+
+                $("#brandModal").modal("hide");
+            });
+        });
+    </script>
+
+
+
+
 }

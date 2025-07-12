@@ -1,5 +1,6 @@
 ﻿using OficinaWeb.Data.Entities;
 using OficinaWeb.Models;
+using Org.BouncyCastle.Asn1.Misc;
 
 namespace OficinaWeb.Helpers
 {
@@ -51,5 +52,46 @@ namespace OficinaWeb.Helpers
                 Role = role
             };
         }
+
+
+        public Vehicle ToVehicle(VehicleViewModel model, bool isNew)
+        {
+            return new Vehicle
+            {
+                Id = isNew ? 0 : model.Id,
+                CarBrandId = model.CarBrandId,
+                CarModelId = model.CarModelId,
+                CarBrand = model.CarBrand,
+                CarModel = model.CarModel,
+                LicensePlate = model.LicensePlate,
+                Year = model.Year,
+                Mileage = model.Mileage,
+                FuelType = model.FuelType,
+                ClientId = model.ClientId,
+                Client = model.Client
+
+            };
+        }
+
+        public VehicleViewModel ToVehicleViewModel(Vehicle vehicle)
+        {
+            return new VehicleViewModel
+            {
+                Id = vehicle.Id,
+                CarBrandId = vehicle.CarBrandId,
+                CarModelId = vehicle.CarModelId,
+                CarBrand = vehicle.CarBrand,
+                CarModel = vehicle.CarModel,
+                LicensePlate = vehicle.LicensePlate,
+                Year = vehicle.Year,
+                Mileage = vehicle.Mileage,
+                FuelType = vehicle.FuelType,
+                ClientId = vehicle.ClientId,
+                Client = vehicle.Client
+
+            };
+        }
+
+
     }
 }

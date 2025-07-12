@@ -18,25 +18,31 @@ namespace OficinaWeb.Controllers
         private readonly IAppointmentsRepository _appointmentsRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IConverterHelper _converterHelper;
+        private readonly IMechanicRepository _mechanicRepository;
+        private readonly IVehicleRepository _vehicleRepository;
         private readonly DataContext _context;
 
         public AppointmentsController(
             IAppointmentsRepository appointmentsRepository,
             IClientRepository clientRepository,
             IConverterHelper converterHelper,
+            IMechanicRepository mechanicRepository,
+            IVehicleRepository vehicleRepository,
             DataContext context)
         {
             _appointmentsRepository = appointmentsRepository;
             _clientRepository = clientRepository;
             _converterHelper = converterHelper;
+            _mechanicRepository = mechanicRepository;
+            _vehicleRepository = vehicleRepository;
             _context = context;
         }
 
         // GET: Appointments
         public async Task<IActionResult> Index()
         {
-           
-            return View(_appointmentsRepository.GetAll().Include(a => a.Client).Include(a => a.Mechanic).Include(a => a.Vehicle));
+
+            return  View( _appointmentsRepository.GetAll().Include(a => a.Client).Include(a => a.Mechanic).Include(a => a.Vehicle));
         }
 
         // GET: Appointments/Details/5
@@ -60,17 +66,25 @@ namespace OficinaWeb.Controllers
         // GET: Appointments/Create
         public IActionResult Create()
         {
+            var clients = _clientRepository.GetAll()?.ToList() ?? new List<Client>();
+            var appointments = _appointmentsRepository.GetAll()?.ToList() ?? new List<Appointment>();
+
             var model = new AppointmentViewModel
             {
-                Clients = _clientRepository.GetAll().ToList(),
-                Appointments = _appointmentsRepository.GetAll().ToList(),
+                Clients = clients,
+                Appointments = appointments,
                 Date = DateTime.Now,
-                AppointmentEnd = DateTime.Now.AddHours(1).TimeOfDay
+                AppointmentEnd = DateTime.Now.AddHours(1).TimeOfDay,
             };
-          
 
-            ViewData["MechanicId"] = new SelectList(_context.Mechanics, "Id", "Name");
-            ViewData["VehicleId"] = new SelectList(_context.Vehicles, "Id", "Brand");
+            var mechanics =  _mechanicRepository.GetAll()?.ToList() ?? new List<Mechanic>();
+            var vehicles = _vehicleRepository.GetAll()?.ToList() ?? new List<Vehicle>(); ;
+
+            ViewBag.MechanicId = new SelectList(mechanics, "Id", "Name");
+            ViewBag.VehicleId = new SelectList(vehicles, "Id", "CarBrand");
+
+       
+
             return View(model);
         }
 
@@ -88,9 +102,9 @@ namespace OficinaWeb.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            
-            ViewData["MechanicId"] = new SelectList(_context.Mechanics, "Id", "Name", model.MechanicId);
-            ViewData["VehicleId"] = new SelectList(_context.Vehicles, "Id", "Brand", model.VehicleId);
+
+            ViewBag.MechanicId = new SelectList(_context.Mechanics, "Id", "Name");
+            ViewBag.VehicleId = new SelectList(_context.Vehicles, "Id", "Brand");
 
             model.Clients = _clientRepository.GetAll().ToList();
             model.Appointments = _appointmentsRepository.GetAll().ToList();
