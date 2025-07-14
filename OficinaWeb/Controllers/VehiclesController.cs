@@ -258,6 +258,8 @@ namespace OficinaWeb.Controllers
             }
 
             var vehicles = await _vehicleRepository.GetAll()
+                .Include(v => v.CarBrand)
+                .Include(v => v.CarModel)
                 .Where(v => v.ClientId == client.Id)
                 .OrderBy(v => v.CarModel)
                 .ToListAsync();
@@ -280,17 +282,17 @@ namespace OficinaWeb.Controllers
         public IActionResult GetVehiclesByClientId(int clientId)
         {
             var vehicles = _vehicleRepository.GetAll()
-                .Where(v => v.ClientId == clientId)
-                .Select(v => new
-                {
+                 .Include(v => v.CarBrand)
+                 .Include(v => v.CarModel)
+                 .Where(v => v.ClientId == clientId)
+                 .Select(v => new
+                 {
                     id = v.Id,
-                    name = v.CarBrand + " " + v.CarModel + " (" + v.LicensePlate + ")"
-                })
-                .ToList();
+                   name = v.CarBrand.Name + " " + v.CarModel.Name + " (" + v.LicensePlate + ")"
+                 })
+                 .ToList();
 
             return Json(vehicles);
-
-
 
         }
 

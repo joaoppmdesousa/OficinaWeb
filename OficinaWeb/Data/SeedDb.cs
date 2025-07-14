@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace OficinaWeb.Data
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
-            
+
 
             await _userHelper.CheckRoleAsync("Admin");
             await _userHelper.CheckRoleAsync("Client");
@@ -59,6 +60,7 @@ namespace OficinaWeb.Data
                 await _userHelper.AddUserToRoleAsync(user, "Admin");
             }
 
+            await _context.SaveChangesAsync();
 
             if (!_context.Specialties.Any())
             {
@@ -69,10 +71,67 @@ namespace OficinaWeb.Data
                 await _context.SaveChangesAsync();
             }
 
+            if (!_context.CarBrands.Any())
+            {
+                var bmw = new CarBrand { Name = "BMW" };
+                var toyota = new CarBrand { Name = "Toyota" };
+                var ford = new CarBrand { Name = "Ford" };
+
+                _context.CarBrands.AddRange(bmw, toyota, ford);
+                await _context.SaveChangesAsync();
+
+                // Agora adiciona os modelos para cada marca
+                var bmwModels = new List<CarModel>
+                {
+                    new CarModel { Name = "Serie 1", CarBrand = bmw },
+                    new CarModel { Name = "Serie 3", CarBrand = bmw },
+                    new CarModel { Name = "X5", CarBrand = bmw }
+                };
+
+                var toyotaModels = new List<CarModel>
+                {
+                    new CarModel { Name = "Corolla", CarBrand = toyota },
+                    new CarModel { Name = "Yaris", CarBrand = toyota },
+                    new CarModel { Name = "RAV4", CarBrand = toyota }
+                };
+
+                var fordModels = new List<CarModel>
+                 {
+                    new CarModel { Name = "Fiesta", CarBrand = ford },
+                    new CarModel { Name = "Focus", CarBrand = ford },
+                    new CarModel { Name = "Mustang", CarBrand = ford }
+                };
+
+                _context.CarModels.AddRange(bmwModels);
+                _context.CarModels.AddRange(toyotaModels);
+                _context.CarModels.AddRange(fordModels);
+
+                await _context.SaveChangesAsync();             
+
+
+            }
+
+            if (!_context.ServiceTypes.Any())
+            {
+                _context.ServiceTypes.AddRange(
+                    new ServiceType { Name = "Oil Change" },
+                    new ServiceType { Name = "Tire Rotation" },
+                    new ServiceType { Name = "Brake Inspection" },
+                    new ServiceType { Name = "Engine Diagnostics" },
+                    new ServiceType { Name = "Vehicle Inspection" },
+                    new ServiceType { Name = "Battery Replacement" },
+                    new ServiceType { Name = "Wheel Alignment" },
+                    new ServiceType { Name = "Air Conditioning Service" },
+                    new ServiceType { Name = "Transmission Repair" },
+                    new ServiceType { Name = "Exhaust System Repair" },
+                    new ServiceType { Name = "Suspension Repair" }
+                );
+
+                await _context.SaveChangesAsync();
+            }
+
+
         }
-
-
-
 
     }
 }

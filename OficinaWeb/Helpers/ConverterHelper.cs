@@ -93,5 +93,67 @@ namespace OficinaWeb.Helpers
         }
 
 
+        public ScheduleViewModel ToScheduleViewModel(Appointment appointment)
+        {
+            return new ScheduleViewModel
+            {
+                Id = appointment.Id,
+                Subject = "Unavailable",
+                StartTime = appointment.Date,
+                EndTime = appointment.Date.Date + appointment.AppointmentEnd
+
+            };
+        }
+
+
+
+        public RepairAndServices ToRepairAndServices(RepairAndServicesViewModel model, bool isNew)
+        {
+            return new RepairAndServices
+            {
+                Id = isNew ? 0 : model.Id,
+                ServiceTypeId = model.ServiceTypeId,
+                ServiceType = model.ServiceType,
+                Details = model.Details,
+                ClientId = model.ClientId,
+                Client = model.Client,
+                VehicleId = model.VehicleId,
+                Vehicle = model.Vehicle,
+                BeginDate = model.BeginDate,
+                EndDate = model.EndDate,
+                ServicePrice = model.ServicePrice,
+                Mechanics = model.Mechanics,
+                MechanicIds = model.MechanicIds,
+                Parts = model.Parts
+
+
+            };
+        }
+
+        public RepairAndServicesViewModel ToRepairAndServicesViewModel(RepairAndServices repairAndServices)
+        {
+            return new RepairAndServicesViewModel
+            {
+                Id = repairAndServices.Id,
+                ServiceTypeId= repairAndServices.ServiceTypeId,
+                ServiceType = repairAndServices.ServiceType,
+                Details = repairAndServices.Details,
+                ClientId = repairAndServices.ClientId,
+                Client = repairAndServices.Client,
+                VehicleId = repairAndServices.VehicleId,
+                Vehicle = repairAndServices.Vehicle,
+                BeginDate = repairAndServices.BeginDate,
+                EndDate = repairAndServices.EndDate,
+                ServicePrice = repairAndServices.ServicePrice,
+                Mechanics = repairAndServices.Mechanics,
+                MechanicIds = repairAndServices.MechanicIds,
+                Parts = repairAndServices.Parts
+
+
+            };
+        }
+
+
+
     }
 }

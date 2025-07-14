@@ -14,6 +14,11 @@ namespace OficinaWeb.Data.Entities
 
 
         [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+
+        [Required]
         [Display(Name = "Specialty")]
         public int MechanicSpecialtyId { get; set; }
 

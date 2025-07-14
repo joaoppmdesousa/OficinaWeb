@@ -11,5 +11,8 @@ namespace OficinaWeb.Data
 
         public Task<Mechanic> GetByIdAsyncWithIncludes(int id);
 
+
+        Task<Mechanic> GetByEmailAsync(string email);
+
     }
 }

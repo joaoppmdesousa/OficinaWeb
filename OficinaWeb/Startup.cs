@@ -86,6 +86,8 @@ namespace OficinaWeb
             services.AddScoped<ISpecialtiesRepository, SpecialtiesRepository>();
             services.AddScoped<ICarBrandRepository, CarBrandRepository>();
             services.AddScoped<ICarModelRepository, CarModelRepository>();
+            services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
+
 
 
 

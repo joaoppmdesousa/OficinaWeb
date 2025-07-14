@@ -29,6 +29,11 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Mechanics" asp-action="Schedule">Schedule</a>
+                        </li>
+
                         @if(this.User.Identity.IsAuthenticated && this.User.IsInRole("Admin"))
 						{
 							<li class="nav-item dropdown">
@@ -40,8 +45,7 @@
                                     <li><a class="dropdown-item"  asp-area="" asp-controller="Clients" asp-action="AdminClientList" >Admin Client List</a></li>
                                     <li><a class="dropdown-item"  asp-area="" asp-controller="MechanicSpecialties" asp-action="Index" >Mechanic Specialties</a></li>
                                     <li><a class="dropdown-item"  asp-area="" asp-controller="CarBrands" asp-action="Index" >Brands and Models</a></li>
-
-
+                                    <li><a class="dropdown-item"  asp-area="" asp-controller="ServiceTypes" asp-action="Index" >Service Types</a></li>
 								</ul>
 							</li>
 						
@@ -61,6 +65,16 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>   
                         }
+
+                         @if(this.User.Identity.IsAuthenticated && this.User.IsInRole("Employee"))
+                        {
+                             <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="RepairAndServices" asp-action="MyServices">Completed Services</a>
+                        </li>   
+                        }
+
+
+
                          @if(this.User.Identity.IsAuthenticated && this.User.IsInRole("Client"))
                         {
                         <li class="nav-item">

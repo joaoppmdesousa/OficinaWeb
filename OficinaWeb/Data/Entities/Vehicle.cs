@@ -53,8 +53,8 @@ namespace OficinaWeb.Data.Entities
         public ICollection<Appointment> Appointments { get; set; }
 
 
-
-        public string VehicleDescription => $"{CarBrand} {CarModel}, {LicensePlate}";
+         
+        public string VehicleDescription => $"{CarBrand?.Name ??("N/A") } {CarModel?.Name ?? ("N/A")}, {LicensePlate}";
 
 
 

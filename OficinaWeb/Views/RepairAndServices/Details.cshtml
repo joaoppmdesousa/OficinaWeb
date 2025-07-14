@@ -4,17 +4,17 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Invoice</h1>
 
 <div>
     <h4>RepairAndServices</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ServiceType)
+            @Html.DisplayNameFor(model => model.ServiceTypeId)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ServiceType)
+            @Html.DisplayFor(model => model.ServiceType.Name)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Mechanics)
@@ -59,9 +59,46 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.ServicePrice)
         </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Parts)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Parts != null && Model.Parts.Any())
+            {
+                <ul>
+                    @foreach (var part in Model.Parts)
+                    {
+                        <li>@part.Name - @part.UnitPrice.ToString("C")</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <span>No parts used.</span>
+			}
+           
+        </dd>
+
+        <dt class="col-sm-2">
+            Full Price
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TotalPrice)
+        </dd>
+
+
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-success">Edit</a>
-    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+    @if (ViewData["FromMyServices"] != null && (bool)ViewData["FromMyServices"])
+    {
+        <a asp-action="MyServices" class="btn btn-outline-primary">Back to Services</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+    }
+
+  
 </div>

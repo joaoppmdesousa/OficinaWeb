@@ -1,0 +1,45 @@
+﻿@model OficinaWeb.Models.MyServicesViewModel
+@{
+    ViewData["Title"] = "MyServices";
+}
+
+<h1>Completed Services</h1>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().ServiceTypeId)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().Details)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().ClientId)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().VehicleId)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().BeginDate)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().EndDate)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().ServicePrice)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().Mechanics)</th>
+            <th>@Html.DisplayNameFor(model => model.MyServices.First().Parts)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.MyServices)
+        {
+            <tr>
+                <td>@item.ServiceType?.Name</td>
+                <td>@item.Details</td>
+                <td>@item.Client?.Name</td>
+                <td>@item.Vehicle?.VehicleDescription</td>
+                <td>@item.BeginDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.ServicePrice</td>
+                <td>@item.MechanicsNames</td>
+                <td>@string.Join(", ", item.Parts?.Select(p => p.Name) ?? Enumerable.Empty<string>())</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" asp-route-fromMyServices="true" class="btn btn-outline-info">Invoice</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

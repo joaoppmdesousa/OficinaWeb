@@ -2,32 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
+using OficinaWeb.Models;
 
 namespace OficinaWeb.Controllers
 {
-
-    //TODO: Serviceprice ainda atrofia com a " , "
     public class RepairAndServicesController : Controller
     {
         private readonly DataContext _context;
         private readonly IRepairAndServicesRepository _repairAndServicesRepository;
         private readonly IMechanicRepository _mechanicRepository;
+        private readonly IServiceTypeRepository _serviceTypeRepository;
+        private readonly IConverterHelper _converterHelper;
         private readonly IVehicleRepository _vehicleRepository;
 
         public RepairAndServicesController(
             DataContext context,
             IRepairAndServicesRepository repairAndServicesRepository,
             IMechanicRepository mechanicRepository,
+            IServiceTypeRepository serviceTypeRepository,
+            IConverterHelper converterHelper,
             IVehicleRepository vehicleRepository)
         {
             _context = context;
             _repairAndServicesRepository = repairAndServicesRepository;
             _mechanicRepository = mechanicRepository;
+            _serviceTypeRepository = serviceTypeRepository;
+            _converterHelper = converterHelper;
             _vehicleRepository = vehicleRepository;
         }
 
@@ -38,12 +45,15 @@ namespace OficinaWeb.Controllers
                 .GetAll()
                 .Include(r => r.Client)
                 .Include(r => r.Vehicle)
+                .Include(r => r.Vehicle.CarBrand)
+                .Include(r => r.Vehicle.CarModel)
                 .Include(r => r.Mechanics)
+                .Include(r => r.ServiceType)
                 .OrderBy(r => r.BeginDate));
         }
 
         // GET: RepairAndServices/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, bool fromMyServices = false)
         {
             if (id == null)
             {
@@ -56,13 +66,22 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
+            ViewData["FromMyServices"] = fromMyServices;
+
             return View(repairAndServices);
         }
 
         // GET: RepairAndServices/Create
         public IActionResult Create()
         {
-            return View();
+            var model = new RepairAndServicesViewModel();
+
+            var serviceTypes = _serviceTypeRepository.GetAll().ToList();
+            model.ServiceTypes = new SelectList(serviceTypes, "Id","Name");
+
+
+
+            return View(model);
         }
 
         // POST: RepairAndServices/Create
@@ -70,16 +89,12 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RepairAndServices repairAndServices)
+        public async Task<IActionResult> Create(RepairAndServicesViewModel model)
         {
 
             if (ModelState.IsValid)
             {
-
-                //var allMechanics = await _mechanicRepository.GetAll().ToListAsync();
-                //repairAndServices.Mechanics = allMechanics
-                //    .Where(m => repairAndServices.MechanicIds.Contains(m.Id))
-                //    .ToList();
+                var repairAndServices = _converterHelper.ToRepairAndServices(model, true);
 
                 await _repairAndServicesRepository.CreateAsync(repairAndServices);
 
@@ -87,9 +102,13 @@ namespace OficinaWeb.Controllers
                 
 
                 return RedirectToAction("Index");
-            }
-           
-            return View(repairAndServices);
+            }            
+
+            var serviceTypes = _serviceTypeRepository.GetAll().ToList();
+            model.ServiceTypes = new SelectList(serviceTypes, "Id", "Name");
+
+
+            return View(model);
         }
 
 
@@ -112,9 +131,14 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            
+            var model = _converterHelper.ToRepairAndServicesViewModel(repairAndServices);
 
-            return View(repairAndServices);
+            var serviceTypes = _serviceTypeRepository.GetAll().ToList();
+            model.ServiceTypes = new SelectList(serviceTypes, "Id", "Name");
+
+
+
+            return View(model);
         }
 
         // POST: RepairAndServices/Edit/5
@@ -188,6 +212,47 @@ namespace OficinaWeb.Controllers
 
         }
 
+
+
+        [Authorize(Roles ="Employee")]
+        public async Task<IActionResult> MyServices(string email)
+        {
+            email = User.Identity.Name;
+
+            var mechanic = await  _mechanicRepository.GetByEmailAsync(email);
+
+            if (mechanic == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+
+            var services = await _repairAndServicesRepository.GetAll()
+                .Where(r => r.Mechanics.Any(m => m.Id == mechanic.Id) && r.EndDate < DateTime.Now)
+                .Include(r => r.ServiceType)
+                .Include(r => r.Client)
+                .Include(r => r.Vehicle)
+                 .ThenInclude(v => v.CarBrand)
+                 .Include(r => r.Vehicle)
+                 .ThenInclude(v => v.CarModel)
+                .Include(r => r.Parts)
+                .Include(r => r.Mechanics)
+                .ToListAsync();
+
+            if(services != null)
+            {
+                var model = new MyServicesViewModel
+                {
+                    MyServices = services.ToList()
+                };
+
+                return View(model);
+            }
+
+
+            return RedirectToAction("Index", "Home");
+
+        }
 
     }
 

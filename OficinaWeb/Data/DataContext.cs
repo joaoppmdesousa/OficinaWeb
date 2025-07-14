@@ -27,6 +27,8 @@ namespace OficinaWeb.Data
 
         public DbSet<CarModel> CarModels { get; set; }
 
+        public DbSet<ServiceType> ServiceTypes { get; set; }
+
 
 
 

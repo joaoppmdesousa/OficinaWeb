@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
+using OficinaWeb.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
@@ -17,15 +18,21 @@ namespace OficinaWeb.Controllers
     {
         private readonly DataContext _context;
         private readonly IMechanicRepository _mechanicRepository;
+        private readonly IAppointmentsRepository _appointmentsRepository;
+        private readonly IConverterHelper _converterHelper;
         private readonly IUserHelper _userHelper;
 
         public MechanicsController(
             DataContext context,
             IMechanicRepository mechanicRepository,
+            IAppointmentsRepository appointmentsRepository,
+            IConverterHelper converterHelper,
             IUserHelper userHelper)
         {
             _context = context;
             _mechanicRepository = mechanicRepository;
+            _appointmentsRepository = appointmentsRepository;
+            _converterHelper = converterHelper;
             _userHelper = userHelper;
         }
 
@@ -177,6 +184,43 @@ namespace OficinaWeb.Controllers
                 .ToListAsync();
 
             return Json(mechanics);
+        }
+
+
+        [AllowAnonymous]
+        public IActionResult Schedule()
+        {
+
+            var appointmentsAux = _appointmentsRepository.GetAll();
+            var appointmentsViewModel = new List<ScheduleViewModel>();
+
+            foreach (Appointment appointment in appointmentsAux)
+            {
+                var viewModel = _converterHelper.ToScheduleViewModel(appointment);
+                appointmentsViewModel.Add(viewModel);
+            }
+           
+            
+
+            var mechanics = _mechanicRepository.GetAll();
+            if (mechanics.Any())
+            {
+                var earliestClockIn = mechanics.Min(m => m.ClockIn).ToString(@"hh\:mm");
+                var latestClockOut = mechanics.Max(m => m.ClockOut).ToString(@"hh\:mm");
+                var todayDate = DateTime.Today;
+
+                ViewBag.StartHour = earliestClockIn;
+                ViewBag.EndHour = latestClockOut;
+                ViewBag.TodayDate = todayDate.ToString("yyyy-MM-dd");
+            }
+           
+
+
+           
+
+
+            return View(appointmentsViewModel);
+
         }
 
 

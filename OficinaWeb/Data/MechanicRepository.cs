@@ -30,7 +30,14 @@ namespace OficinaWeb.Data
             .ToListAsync();
         }
 
-    
+
+        public async Task<Mechanic> GetByEmailAsync(string email)
+        {
+            var mechanic = await _context.Mechanics.FirstOrDefaultAsync(c => c.Email == email);
+
+            return mechanic;
+        }
+
 
     }
 }

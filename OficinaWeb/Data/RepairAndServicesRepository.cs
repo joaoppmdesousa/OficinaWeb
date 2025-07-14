@@ -50,10 +50,15 @@ namespace OficinaWeb.Data
         public async Task<RepairAndServices> GetWithIncludesAsync(int id)
         {
             return await _context.RepairsAndServices
-                .Include(r => r.Client)
-                .Include(r => r.Vehicle)
-                .Include(r => r.Mechanics)
-                .FirstOrDefaultAsync(r => r.Id == id);
+             .Include(r => r.Client)
+             .Include(r => r.Vehicle)
+             .ThenInclude(v => v.CarBrand)
+             .Include(r => r.Vehicle)
+             .ThenInclude(v => v.CarModel)
+             .Include(r => r.Mechanics)
+             .Include(r => r.Parts)
+             .Include(r => r.ServiceType)
+             .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task UpdateMechanicsAsync(int repairId, List<int> newMechanicIds)

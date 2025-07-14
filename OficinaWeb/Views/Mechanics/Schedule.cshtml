@@ -1,0 +1,38 @@
+﻿
+
+@model List<OficinaWeb.Models.ScheduleViewModel>
+@using Syncfusion.EJ2.Schedule
+
+@{
+    ViewData["Title"] = "Schedule";
+}
+
+<h1>Schedule</h1>
+
+<ejs-schedule id="schedule"
+              height="650px"
+              selectedDate="@ViewBag.TodayDate"
+              startHour="@ViewBag.StartHour"
+              endHour="@ViewBag.EndHour"
+              readonly="true"
+              popupOpen="onPopupOpen">
+
+    <e-schedule-eventsettings dataSource="Model"></e-schedule-eventsettings>
+    <e-schedule-views>
+        <e-schedule-view option="WorkWeek"></e-schedule-view>
+        <e-schedule-view option="Month"></e-schedule-view>
+    </e-schedule-views>
+</ejs-schedule>
+
+@section Scripts {
+    <script>
+        function onPopupOpen(args) {
+           
+            args.cancel = true;
+        }
+    </script>
+}
+
+
+
+

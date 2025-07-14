@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OficinaWeb.Data;
 
 namespace OficinaWeb.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250713135636_AddServiceType")]
+    partial class AddServiceType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -292,10 +294,6 @@ namespace OficinaWeb.Migrations
                     b.Property<TimeSpan>("ClockOut")
                         .HasColumnType("time");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("MechanicSpecialtyId")
                         .HasColumnType("int");
 
@@ -381,8 +379,9 @@ namespace OficinaWeb.Migrations
                     b.Property<decimal>("ServicePrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ServiceTypeId")
-                        .HasColumnType("int");
+                    b.Property<string>("ServiceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
@@ -390,8 +389,6 @@ namespace OficinaWeb.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("ServiceTypeId");
 
                     b.HasIndex("VehicleId");
 
@@ -677,12 +674,6 @@ namespace OficinaWeb.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("OficinaWeb.Data.Entities.ServiceType", "ServiceType")
-                        .WithMany()
-                        .HasForeignKey("ServiceTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("OficinaWeb.Data.Entities.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
@@ -690,8 +681,6 @@ namespace OficinaWeb.Migrations
                         .IsRequired();
 
                     b.Navigation("Client");
-
-                    b.Navigation("ServiceType");
 
                     b.Navigation("Vehicle");
                 });

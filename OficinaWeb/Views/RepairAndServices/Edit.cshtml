@@ -1,4 +1,4 @@
-﻿@model OficinaWeb.Data.Entities.RepairAndServices
+﻿@model OficinaWeb.Models.RepairAndServicesViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,11 +12,13 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group">
-                <label asp-for="ServiceType" class="control-label"></label>
-                <input asp-for="ServiceType" class="form-control" />
-                <span asp-validation-for="ServiceType" class="text-danger"></span>
+                <label asp-for="ServiceTypeId" class="control-label"></label>
+                <select asp-for="ServiceTypeId" class="form-control" asp-items="Model.ServiceTypes"></select>
+                <span asp-validation-for="ServiceTypeId" class="text-danger"></span>
             </div>
+
 
             <div class="form-group">
                 <label for="SelectedClientName">Client</label>
@@ -171,7 +173,7 @@
                 vehicles.forEach(vehicle => {
                     const opt = document.createElement("option");
                     opt.value = vehicle.id;
-                    opt.text = vehicle.name;
+                         opt.text = vehicle.name;
                     if (vehicle.id == "@Model.VehicleId") {
                         opt.selected = true;
                     }

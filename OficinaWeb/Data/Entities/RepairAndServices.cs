@@ -13,7 +13,9 @@ namespace OficinaWeb.Data.Entities
 
         [Required]
         [Display(Name = "Type")]
-        public string ServiceType { get; set; }
+        public int ServiceTypeId { get; set; }
+
+        public ServiceType ServiceType { get; set; }
 
         public string Details { get; set; }
 
@@ -55,12 +57,12 @@ namespace OficinaWeb.Data.Entities
 
 
         [NotMapped] 
-        public decimal TotalPrice
+        public string TotalPrice
         {
             get
             {
                 var partsTotal = Parts?.Sum(p => p.UnitPrice) ?? 0;
-                return ServicePrice + partsTotal;
+                return (ServicePrice + partsTotal).ToString("C");
             }
         }
 

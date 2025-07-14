@@ -90,8 +90,7 @@ namespace OficinaWeb.Controllers
             ViewBag.Roles = new List<SelectListItem>
             {
                 new SelectListItem { Text = "Admin", Value = "Admin" },
-                new SelectListItem { Text = "Employee", Value = "Employee" },
-                new SelectListItem { Text = "Client", Value = "Client" }
+                new SelectListItem { Text = "Employee", Value = "Employee" }
             };
 
             return View();
@@ -124,7 +123,7 @@ namespace OficinaWeb.Controllers
                     if (result != IdentityResult.Success)
                     {
                         ModelState.AddModelError(string.Empty, "Failed to create user.");
-                        return View(model);
+                        //return View(model);
                     }
 
 
@@ -141,14 +140,19 @@ namespace OficinaWeb.Controllers
                     Response response = _emailHelper.SendEmail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
                         $"To allow the user, " +
                         $"please click in this link:</br></br><a href = \"{tokenLink}\">Confirm Email</a>");
-                   
-                    if (response.IsSuccess)
+
+                    if (!response.IsSuccess)
                     {
-                        ViewBag.Message = "The intructions to allow you user has been sent to email";
-                        return View(model);
+                        ModelState.AddModelError(string.Empty, "Failed to send confirmation email.");
                     }
 
-                    ModelState.AddModelError(string.Empty, "Failed to login.");
+                    if (response.IsSuccess)
+                    {
+                        TempData["Message"] = "The instructions to confirm your account have been sent to the email provided.";
+                        return RedirectToAction("RegisterConfirmation");
+                    }
+
+                   
                 }
             }
 
@@ -160,6 +164,14 @@ namespace OficinaWeb.Controllers
 
             return View(model);
         }
+
+
+        public IActionResult RegisterConfirmation()
+        {
+            return View();
+        }
+
+
 
         public async Task<IActionResult> ChangeUser()
         {
