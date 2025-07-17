@@ -123,7 +123,7 @@ namespace OficinaWeb.Controllers
                     if (result != IdentityResult.Success)
                     {
                         ModelState.AddModelError(string.Empty, "Failed to create user.");
-                        //return View(model);
+                        return View(model);
                     }
 
 
@@ -152,7 +152,7 @@ namespace OficinaWeb.Controllers
                         return RedirectToAction("RegisterConfirmation");
                     }
 
-                   
+
                 }
             }
 
@@ -162,7 +162,7 @@ namespace OficinaWeb.Controllers
                 new SelectListItem { Text = "Employee", Value = "Employee" }
             };
 
-            return View(model);
+            return RedirectToAction("AdminClientList", "Clients"); ;
         }
 
 
@@ -255,10 +255,10 @@ namespace OficinaWeb.Controllers
                 var user = await _userHelper.GetUserByEmailAsync(model.Username);
                 if (user != null)
                 {
-                    
+
                     if (await _userHelper.IsUserInRoleAsync(user, "Client"))
                     {
-                       
+
                         bool isDefaultPassword = await _userHelper.CheckPasswordAsync(user, "defaultpassclient");
                         if (isDefaultPassword)
                         {
@@ -355,7 +355,7 @@ namespace OficinaWeb.Controllers
 
         [HttpPost]
         public async Task<IActionResult> SetPassword(SetPasswordViewModel model)
-        {           
+        {
 
             if (ModelState.IsValid)
             {
@@ -404,7 +404,7 @@ namespace OficinaWeb.Controllers
                 PhoneNumber = client.Contact,
             };
 
-            var result = await _userHelper.AddUserAsync(user, "defaultpassclient"); //TODO Senha padrão, deve ser alterada posteriormente
+            var result = await _userHelper.AddUserAsync(user, "defaultpassclient");
 
             if (result.Succeeded)
             {
@@ -415,22 +415,27 @@ namespace OficinaWeb.Controllers
                 var model = _converterHelper.ToRegisterNewUserViewModel(user, "Client");
 
                 string tokenLink = Url.Action("SetPassword", "Account", new
-                    {
-                        userId = user.Id,
-                        token = myToken
-                    }, protocol: HttpContext.Request.Scheme);
+                {
+                    userId = user.Id,
+                    token = myToken
+                }, protocol: HttpContext.Request.Scheme);
 
-                    Response response = _emailHelper.SendEmail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
-                        $"To allow the user, " +
-                        $"you will need to set your password,please click in this link:</br></br><a href = \"{tokenLink}\">Set Password</a>");
-                   
-                    if (response.IsSuccess)
-                    {
-                        ViewBag.Message = "The intructions to allow the user has been sent to users email";
-                        return RedirectToAction("AdminClientList", "Clients");
+                Response response = _emailHelper.SendEmail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+                    $"To allow the user, " +
+                    $"you will need to set your password,please click in this link:</br></br><a href = \"{tokenLink}\">Set Password</a>");
+
+
+                if (!response.IsSuccess)
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to send confirmation email.");
                 }
 
-                TempData["Success"] = "User created Successfully.";
+                if (response.IsSuccess)
+                {
+                    TempData["Message"] = "The instructions to confirm your account have been sent to the email provided.";
+                    return RedirectToAction("RegisterConfirmation");
+                }
+               
             }
             else
             {
@@ -440,5 +445,6 @@ namespace OficinaWeb.Controllers
             return RedirectToAction("AdminClientList", "Clients"); ;
         }
 
+    
     }
 }

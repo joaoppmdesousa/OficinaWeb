@@ -49,10 +49,19 @@
         </dd>
 
     </dl>
+
+    <p class="alert alert-info"> On deleting it will send an email to warn the client.</p>
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Delete" class="btn btn-danger" />
         <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
     </form>
+    @if (TempData["Failed"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Failed"]
+        </div>
+    }
+
 </div>

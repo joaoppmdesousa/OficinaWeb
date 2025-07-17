@@ -13,7 +13,7 @@ using OficinaWeb.Models;
 
 namespace OficinaWeb.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     public class ClientsController : Controller
     {
         private readonly IClientRepository _clientRepository;
@@ -30,6 +30,7 @@ namespace OficinaWeb.Controllers
             _context = context;
         }
 
+        [Authorize(Roles = "Employee")]
         // GET: Clients
         public IActionResult Index()
         {
@@ -67,7 +68,7 @@ namespace OficinaWeb.Controllers
 
         }
 
-
+        [Authorize(Roles = "Employee")]
         // GET: Clients/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -85,12 +86,16 @@ namespace OficinaWeb.Controllers
             return View(client);
         }
 
+
+        [Authorize(Roles = "Employee")]
         // GET: Clients/Create
         public IActionResult Create()
         {
             return View();
         }
 
+
+        [Authorize(Roles = "Employee")]
         // POST: Clients/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -107,6 +112,7 @@ namespace OficinaWeb.Controllers
             return View(client);
         }
 
+        [Authorize(Roles = "Employee")]
         // GET: Clients/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -123,6 +129,8 @@ namespace OficinaWeb.Controllers
             return View(client);
         }
 
+
+        [Authorize(Roles = "Employee")]
         // POST: Clients/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -157,6 +165,7 @@ namespace OficinaWeb.Controllers
             return View(client);
         }
 
+        [Authorize(Roles = "Employee")]
         // GET: Clients/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -174,6 +183,7 @@ namespace OficinaWeb.Controllers
             return View(client);
         }
 
+        [Authorize(Roles = "Employee")]
         // POST: Clients/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -187,7 +197,7 @@ namespace OficinaWeb.Controllers
 
 
 
-
+        [Authorize(Roles = "Employee")]
         [HttpGet]
         public IActionResult SearchClients(string search)
         {

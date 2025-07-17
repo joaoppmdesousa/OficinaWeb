@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
-    [Authorize(Roles ="Admin")]
+   
     public class MechanicsController : Controller
     {
         private readonly DataContext _context;
@@ -36,13 +36,16 @@ namespace OficinaWeb.Controllers
             _userHelper = userHelper;
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Mechanics
         public async Task<IActionResult> Index()
         {
             return View(_mechanicRepository.GetAll().Include(a => a.MechanicSpecialty));
         }
 
+
         // GET: Mechanics/Details/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -59,7 +62,9 @@ namespace OficinaWeb.Controllers
             return View(mechanic);
         }
 
+
         // GET: Mechanics/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
 
@@ -71,6 +76,7 @@ namespace OficinaWeb.Controllers
         // POST: Mechanics/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( Mechanic mechanic)
@@ -87,6 +93,7 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: Mechanics/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -108,6 +115,7 @@ namespace OficinaWeb.Controllers
         // POST: Mechanics/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Mechanic mechanic)
@@ -144,6 +152,7 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: Mechanics/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -163,9 +172,20 @@ namespace OficinaWeb.Controllers
         // POST: Mechanics/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var mechanic = await _mechanicRepository.GetIdAsync(id);
+
+            var hasAppointments = _appointmentsRepository.GetAll()
+                          .Any(a => a.MechanicId == id);
+
+            if (hasAppointments)
+            {
+                TempData["Error"] = "Cannot delete this mechanic because they are assigned to existing appointments.";
+                return RedirectToAction(nameof(Delete));
+            }
+
             await _mechanicRepository.DeleteAsync(mechanic);
             return RedirectToAction(nameof(Index));
         }
@@ -187,36 +207,69 @@ namespace OficinaWeb.Controllers
         }
 
 
-        [AllowAnonymous]
-        public IActionResult Schedule()
+
+        public  IActionResult Schedule()
         {
 
-            var appointmentsAux = _appointmentsRepository.GetAll();
+            var appointmentsAux = _appointmentsRepository.GetAll()
+                                                        .Include(a => a.Vehicle)
+                                                            .ThenInclude(v => v.CarBrand)
+                                                        .Include(a => a.Vehicle)
+                                                            .ThenInclude(v => v.CarModel);
+
             var appointmentsViewModel = new List<ScheduleViewModel>();
+            var mechanics =  _mechanicRepository.GetAll().Include(m => m.MechanicSpecialty);
+            var isMechanic = mechanics.Any(m => m.Email == User.Identity.Name);
+            var IsEmployee = User.IsInRole("Employee");
+            var mechanic = mechanics.FirstOrDefault(m => m.Email == User.Identity.Name);
 
             foreach (Appointment appointment in appointmentsAux)
             {
-                var viewModel = _converterHelper.ToScheduleViewModel(appointment);
-                appointmentsViewModel.Add(viewModel);
+                if(isMechanic)
+                {
+                    if(appointment.MechanicId == mechanic?.Id)
+                    {
+                        var viewModel = _converterHelper.ToScheduleViewModel(appointment, IsEmployee);
+                        appointmentsViewModel.Add(viewModel);
+                    }
+                    
+                }
+                else
+                {               
+                    var viewModel = _converterHelper.ToScheduleViewModel(appointment, IsEmployee);
+                    appointmentsViewModel.Add(viewModel);
+                }
+
             }
            
             
 
-            var mechanics = _mechanicRepository.GetAll();
             if (mechanics.Any())
             {
-                var earliestClockIn = mechanics.Min(m => m.ClockIn).ToString(@"hh\:mm");
-                var latestClockOut = mechanics.Max(m => m.ClockOut).ToString(@"hh\:mm");
+                
                 var todayDate = DateTime.Today;
 
-                ViewBag.StartHour = earliestClockIn;
-                ViewBag.EndHour = latestClockOut;
+                if (isMechanic)
+                {
+                    ViewBag.StartHour = mechanic.ClockIn.ToString(@"hh\:mm");
+                    ViewBag.EndHour = mechanic.ClockOut.ToString(@"hh\:mm");
+                }
+                else
+                {
+                    var earliestClockIn = mechanics.Min(m => m.ClockIn).ToString(@"hh\:mm");
+                    var latestClockOut = mechanics.Max(m => m.ClockOut).ToString(@"hh\:mm");
+
+                    ViewBag.StartHour = earliestClockIn;
+                    ViewBag.EndHour = latestClockOut;
+                }
+
                 ViewBag.TodayDate = todayDate.ToString("yyyy-MM-dd");
             }
-           
 
 
-           
+
+            ViewBag.Mechanics = mechanics;
+            ViewBag.IsMechanic = isMechanic;
 
 
             return View(appointmentsViewModel);

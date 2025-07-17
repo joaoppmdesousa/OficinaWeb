@@ -9,6 +9,9 @@
 <div>
     <h4>RepairAndServices</h4>
     <hr />
+  
+
+
     <dl class="row">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.ServiceTypeId)
@@ -93,7 +96,7 @@
 <div>
     @if (ViewData["FromMyServices"] != null && (bool)ViewData["FromMyServices"])
     {
-        <a asp-action="MyServices" class="btn btn-outline-primary">Back to Services</a>
+        <a asp-action="MyServices" asp-route-id="@ViewData["VehicleId"]" class="btn btn-outline-primary">Back to Services</a>
     }
     else
     {

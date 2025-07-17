@@ -93,16 +93,35 @@ namespace OficinaWeb.Helpers
         }
 
 
-        public ScheduleViewModel ToScheduleViewModel(Appointment appointment)
+        public ScheduleViewModel ToScheduleViewModel(Appointment appointment, bool isEmployee)
         {
-            return new ScheduleViewModel
-            {
-                Id = appointment.Id,
-                Subject = "Unavailable",
-                StartTime = appointment.Date,
-                EndTime = appointment.Date.Date + appointment.AppointmentEnd
 
-            };
+            if (isEmployee)
+            {
+
+                return new ScheduleViewModel
+                {
+                    Id = appointment.Id,
+                    Subject = $"{appointment.AppointmentType}, {appointment.Vehicle.VehicleDescription} ",
+                    StartTime = appointment.Date,
+                    EndTime = appointment.Date.Date + appointment.AppointmentEnd
+
+                };
+            }
+
+            else
+            {
+                return new ScheduleViewModel
+                {
+                    Id = appointment.Id,
+                    Subject = "Unavailable",
+                    StartTime = appointment.Date,
+                    EndTime = appointment.Date.Date + appointment.AppointmentEnd
+
+                };
+            }
+
+            
         }
 
 

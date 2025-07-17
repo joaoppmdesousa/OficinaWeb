@@ -7,7 +7,18 @@
     ViewData["Title"] = "Schedule";
 }
 
-<h1>Schedule</h1>
+
+@if (ViewBag.IsMechanic)
+{
+    <h1>My Schedule</h1>
+}
+else
+{
+    <h1>Schedule</h1>
+}
+
+
+
 
 <ejs-schedule id="schedule"
               height="650px"
@@ -23,6 +34,36 @@
         <e-schedule-view option="Month"></e-schedule-view>
     </e-schedule-views>
 </ejs-schedule>
+
+
+@if (!ViewBag.IsMechanic)
+{
+    <br />
+
+    <div class="alert alert-info text-center p-4 shadow-sm rounded">
+        <h5 class="alert-heading mb-4">Mechanics' Info</h5>
+
+        @if (ViewBag.Mechanics != null)
+        {
+            <div class="row justify-content-center">
+                @foreach (var item in ViewBag.Mechanics)
+                {
+                    <div class="col-md-6 col-lg-4 mb-2">
+                        <div class="border rounded p-2 bg-white text-dark shadow-sm">
+                            <strong>@item.Name</strong><br />
+                            <small>@item.MechanicSpecialty.Name</small><br />
+                            <small>@item.ClockIn.ToString(@"hh\:mm") - @item.ClockOut.ToString(@"hh\:mm")</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+
+
+
 
 @section Scripts {
     <script>

@@ -5,6 +5,7 @@ using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
 using OficinaWeb.Models;
+using Syncfusion.EJ2.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -19,30 +20,74 @@ namespace OficinaWeb.Controllers
         private readonly IClientRepository _clientRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly IMechanicRepository _mechanicRepository;
+        private readonly ICommunicationHelper _communicationHelper;
         private readonly IVehicleRepository _vehicleRepository;
-        private readonly DataContext _context;
+       
 
         public AppointmentsController(
             IAppointmentsRepository appointmentsRepository,
             IClientRepository clientRepository,
             IConverterHelper converterHelper,
             IMechanicRepository mechanicRepository,
-            IVehicleRepository vehicleRepository,
-            DataContext context)
+            ICommunicationHelper communicationHelper,
+            IVehicleRepository vehicleRepository)
         {
             _appointmentsRepository = appointmentsRepository;
             _clientRepository = clientRepository;
             _converterHelper = converterHelper;
             _mechanicRepository = mechanicRepository;
+            _communicationHelper = communicationHelper;
             _vehicleRepository = vehicleRepository;
-            _context = context;
+
         }
 
         // GET: Appointments
         public async Task<IActionResult> Index()
         {
+            List<Appointment> appointments;
 
-            return  View( _appointmentsRepository.GetAll().Include(a => a.Client).Include(a => a.Mechanic).Include(a => a.Vehicle));
+            if (this.User.IsInRole("Employee"))
+            {
+                var mechanics = _mechanicRepository.GetAll();
+                var isMechanic = mechanics.Any(m => m.Email == User.Identity.Name);
+
+                if (isMechanic)
+                {
+                    appointments = _appointmentsRepository.GetAll()
+                                               .Include(a => a.Client)
+                                               .Include(a => a.Mechanic)
+                                               .Include(a => a.Vehicle)
+                                                   .ThenInclude(v => v.CarBrand)
+                                               .Include(a => a.Vehicle)
+                                                   .ThenInclude(v => v.CarModel)
+                                               .Where(a => a.Mechanic.Email == User.Identity.Name)
+                                               .ToList();
+                }
+                else
+                {
+                    appointments = _appointmentsRepository.GetAll()
+                                               .Include(a => a.Client)
+                                               .Include(a => a.Mechanic)
+                                               .Include(a => a.Vehicle)
+                                                   .ThenInclude(v => v.CarBrand)
+                                               .Include(a => a.Vehicle)
+                                                   .ThenInclude(v => v.CarModel)
+                                               .ToList();
+                }
+            }
+            else
+            {
+                appointments = _appointmentsRepository.GetAll()
+                                           .Include(a => a.Client)
+                                           .Include(a => a.Mechanic)
+                                           .Include(a => a.Vehicle)
+                                               .ThenInclude(v => v.CarBrand)
+                                           .Include(a => a.Vehicle)
+                                               .ThenInclude(v => v.CarModel)
+                                           .ToList();
+            }
+
+            return View(appointments);
         }
 
         // GET: Appointments/Details/5
@@ -103,8 +148,11 @@ namespace OficinaWeb.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.MechanicId = new SelectList(_context.Mechanics, "Id", "Name");
-            ViewBag.VehicleId = new SelectList(_context.Vehicles, "Id", "Brand");
+            var mechanics = await _mechanicRepository.GetAll().ToListAsync();
+            var vehicles = await _vehicleRepository.GetAll().ToListAsync();
+
+            ViewBag.MechanicId = new SelectList(mechanics, "Id", "Name");
+            ViewBag.VehicleId = new SelectList(vehicles, "Id", "Brand");
 
             model.Clients = _clientRepository.GetAll().ToList();
             model.Appointments = _appointmentsRepository.GetAll().ToList();
@@ -129,11 +177,13 @@ namespace OficinaWeb.Controllers
 
             var model =  _converterHelper.ToAppointmentViewModel(appointment);
 
-            model.Clients = _clientRepository.GetAll().ToList();            
-             
-         
-            ViewData["MechanicId"] = new SelectList(_context.Mechanics, "Id", "Name", appointment.MechanicId);
-            ViewData["VehicleId"] = new SelectList(_context.Vehicles, "Id", "Brand", appointment.VehicleId);
+            model.Clients = _clientRepository.GetAll().ToList();
+
+            var mechanics = await _mechanicRepository.GetAll().ToListAsync();
+            var vehicles = await _vehicleRepository.GetAll().ToListAsync();
+
+            ViewData["MechanicId"] = new SelectList(mechanics, "Id", "Name", appointment.MechanicId);
+            ViewData["VehicleId"] = new SelectList(vehicles, "Id", "Brand", appointment.VehicleId);
 
             return View(model);
         }
@@ -173,9 +223,12 @@ namespace OficinaWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-           
-            ViewData["MechanicId"] = new SelectList(_context.Mechanics, "Id", "Name", model.MechanicId);
-            ViewData["VehicleId"] = new SelectList(_context.Vehicles, "Id", "Brand", model.VehicleId);
+
+            var mechanics = await _mechanicRepository.GetAll().ToListAsync();
+            var vehicles = await _vehicleRepository.GetAll().ToListAsync();
+
+            ViewData["MechanicId"] = new SelectList(mechanics, "Id", "Name", model.MechanicId);
+            ViewData["VehicleId"] = new SelectList(vehicles, "Id", "Brand", model.VehicleId);
 
 
             model.Clients = _clientRepository.GetAll().ToList();
@@ -210,16 +263,122 @@ namespace OficinaWeb.Controllers
             try
             {
                 var appointment = await _appointmentsRepository.GetByIdAsyncWithIncludes(id.Value);
+                if (appointment == null)
+                {
+                    return NotFound();
+                }
+                var response = await _communicationHelper.CancelAppointmentNotificationAsync(appointment.Id);
+                if (!response)
+                {
+                    TempData["Failed"] = "failed to send email";
+
+                }
+
                 await _appointmentsRepository.DeleteAsync(appointment);
-                return RedirectToAction(nameof(Index));
+                
             }
             catch (Exception)
             {
                 return View(id);
             }
-          
+
+            return RedirectToAction(nameof(Index));
+
+        }
+
+
+
+
+        public async Task<IActionResult> AppointmentHistory()
+        {
+           var email = User.Identity.Name;
+
+            if (this.User.IsInRole("Employee"))
+            {
+                var mechanic = await _mechanicRepository.GetByEmailAsync(email);
+
+                if (mechanic == null)
+                {
+                    var appointments = _appointmentsRepository.GetAll()
+                                                  .Where((a => a.Date < DateTime.Now))
+                                                  .Include(a => a.Client)
+                                                  .Include(a => a.Vehicle)
+                                                    .ThenInclude(v => v.CarBrand)
+                                                  .Include(a => a.Vehicle)
+                                                    .ThenInclude(v => v.CarModel)
+                                                  .Include(a => a.Mechanic);
+
+
+
+                    if (appointments != null)
+                    {
+                        var model = new AppointmentHistoryViewModel
+                        {
+                            Appointments = appointments.ToList()
+                        };
+
+                        return View(model);
+                    }
+
+                }
+                else
+                {
+                    var appointments = _appointmentsRepository.GetAll()
+                                                 .Where(a => a.Mechanic.Id == mechanic.Id && a.Date < DateTime.Now)
+                                                  .Include(a => a.Client)
+                                                  .Include(a => a.Vehicle)
+                                                    .ThenInclude(v => v.CarBrand)
+                                                  .Include(a => a.Vehicle)
+                                                    .ThenInclude(v => v.CarModel)
+                                                  .Include(a => a.Mechanic);
+
+                    if (appointments != null)
+                    {
+                        var model = new AppointmentHistoryViewModel
+                        {
+                            Appointments = appointments.ToList()
+                        };
+
+                        return View(model);
+                    }
+                }
+            }
+
+
+            if (this.User.IsInRole("Client"))
+            {
+                var client = await _clientRepository.GetByEmailAsync(email);
+                if (client != null)
+                {
+                    var appointments = _appointmentsRepository.GetAll()
+                                                 .Where(a => a.ClientId == client.Id && a.Date < DateTime.Now)
+                                                  .Include(a => a.Client)
+                                                  .Include(a => a.Vehicle)
+                                                    .ThenInclude(v => v.CarBrand)
+                                                  .Include(a => a.Vehicle)
+                                                    .ThenInclude(v => v.CarModel)
+                                                  .Include(a => a.Mechanic);
+
+                    if (appointments != null)
+                    {
+                        var model = new AppointmentHistoryViewModel
+                        {
+                            Appointments = appointments.ToList()
+                        };
+
+                        return View(model);
+                    }
+
+                }
+            }
+
+
+
+                return NotFound();
         }
           
+
+
 
     }
 }

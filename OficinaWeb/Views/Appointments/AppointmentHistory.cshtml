@@ -1,0 +1,60 @@
+﻿@model OficinaWeb.Models.AppointmentHistoryViewModel
+@{
+    ViewData["Title"] = "AppointmentHistory";
+}
+
+<h1>Appointment History</h1>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Appointments.First().AppointmentType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Appointments.First().Date)
+            </th>
+            <th>
+                Time Slot
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Appointments.First().Client)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Appointments.First().Vehicle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Appointments.First().Mechanic)
+            </th>
+           
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Appointments)
+        {
+            <tr>
+                <td>
+                    @item.AppointmentType
+                </td>
+                <td>
+                    @item.Date.ToString("dd-MM-yyyy")
+                </td>
+                <td>
+                    @($"{item.Date:HH\\:mm} / {item.AppointmentEnd:hh\\:mm}")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Client.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Vehicle.VehicleDescription)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Mechanic.Name)
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>

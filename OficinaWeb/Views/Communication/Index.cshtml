@@ -1,0 +1,186 @@
+﻿@model OficinaWeb.Models.CommunicationPanelViewModel
+
+
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<h2>Communication Panel</h2>
+
+<br />
+
+<div class="card shadow-sm border rounded-3 p-4 mb-4">
+    <header class="mb-3">
+        <h5 class="text-primary">Notify Clients of Workshop Closure</h5>
+        <p class="text-muted mb-0">Select the closure dates and send a warning to all clients.</p>
+    </header>
+
+    <form asp-action="NotifyAllClients" id="notifyForm">
+        <div class="mb-3">
+            <label asp-for="NotifyFormModel.BeginDate" class="form-label">Begin Date</label>
+            <ejs-datetimepicker id="BeginDate"
+                                format="dd-MM-yyyy HH:mm"
+                                asp-for="NotifyFormModel.BeginDate"
+                                class="form-control">
+            </ejs-datetimepicker>
+            <span asp-validation-for="NotifyFormModel.BeginDate" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="NotifyFormModel.EndDate" class="form-label">End Date</label>
+            <ejs-datetimepicker id="EndDate"
+                                format="dd-MM-yyyy HH:mm"
+                                asp-for="NotifyFormModel.EndDate"
+                                class="form-control">
+            </ejs-datetimepicker>
+            <span asp-validation-for="NotifyFormModel.EndDate" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-outline-success">
+                Send Warning
+            </button>
+        </div>
+    </form>
+    <br />
+    @if (TempData["NotifyMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @TempData["NotifyMessage"]
+            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+</div>
+
+
+<br />
+
+<div class="card shadow-sm border rounded-3 p-4 mb-4">
+    <header class="mb-3">
+        <h5 class="text-primary">Send Appointment Reminders</h5>
+        <p class="text-muted mb-0">
+            This will send reminder emails for upcoming appointments to all clients scheduled within the next 24 hours.
+        </p>
+    </header>
+
+    <form asp-action="ReminderAppointments">
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-outline-success">
+                Send Reminders
+            </button>
+        </div>
+    </form>
+    <br />
+    @if (TempData["ReminderMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @TempData["ReminderMessage"]
+            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+</div>
+
+
+<br />
+
+<div class="card shadow-sm border rounded-3 p-4 mb-4">
+    <header class="mb-3">
+        <h5 class="text-primary">Send Custom Email</h5>
+        <p class="text-muted mb-0">
+            Manually send a custom message to a specific email address.
+        </p>
+    </header>
+
+    <form asp-action="CustomMessage" method="post">
+        <div class="mb-3">
+            <label asp-for="CustomFormModel.Email" class="form-label">Email</label>
+            <input asp-for="CustomFormModel.Email" class="form-control" />
+            <span asp-validation-for="CustomFormModel.Email" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CustomFormModel.Subject" class="form-label">Subject</label>
+            <input asp-for="CustomFormModel.Subject" class="form-control" />
+            <span asp-validation-for="CustomFormModel.Subject" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CustomFormModel.Body" class="form-label">Message Body</label>
+            <textarea asp-for="CustomFormModel.Body" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="CustomFormModel.Body" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-outline-success">
+                Send Email
+            </button>
+        </div>
+    </form>
+
+    <br />
+
+    @if (TempData["CustomMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @TempData["CustomMessage"]
+            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+                  document.querySelector('#notifyForm').addEventListener('submit', function (e) {
+            const beginPicker = document.getElementById('BeginDate').ej2_instances[0];
+            const endPicker = document.getElementById('EndDate').ej2_instances[0];
+            const begin = beginPicker.value;
+            const end = endPicker.value;
+            const now = new Date();
+
+            const beginError = document.querySelector('[data-valmsg-for="NotifyFormModel.BeginDate"]');
+            const endError = document.querySelector('[data-valmsg-for="NotifyFormModel.EndDate"]');
+            beginError.textContent = '';
+            endError.textContent = '';
+
+            let hasError = false;
+
+            if (!begin) {
+                beginError.textContent = 'Please enter a valid begin date.';
+                hasError = true;
+            }
+
+            if (!end) {
+                endError.textContent = 'Please enter a valid end date.';
+                hasError = true;
+            }
+
+            
+            if (!hasError) {
+                if (begin < now) {
+                    beginError.textContent = 'Begin date cannot be in the past.';
+                    hasError = true;
+                }
+
+                if (end < now) {
+                    endError.textContent = 'End date cannot be in the past.';
+                    hasError = true;
+                }
+
+                if (begin > end) {
+                    endError.textContent = 'End date must be after begin date.';
+                    hasError = true;
+                }
+            }
+
+            if (hasError) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

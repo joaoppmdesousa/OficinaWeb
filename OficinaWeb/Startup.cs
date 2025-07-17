@@ -74,7 +74,7 @@ namespace OficinaWeb
             services.AddScoped<IUserHelper, UserHelper>();
             services.AddScoped<IConverterHelper, ConverterHelper>();
             services.AddScoped<IEmailHelper, EmailHelper>();
-
+            services.AddScoped<ICommunicationHelper, CommunicationHelper>();
 
 
             services.AddScoped<IClientRepository, ClientRepository>();

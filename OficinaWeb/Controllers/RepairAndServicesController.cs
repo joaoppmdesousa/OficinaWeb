@@ -19,6 +19,7 @@ namespace OficinaWeb.Controllers
         private readonly IRepairAndServicesRepository _repairAndServicesRepository;
         private readonly IMechanicRepository _mechanicRepository;
         private readonly IServiceTypeRepository _serviceTypeRepository;
+        private readonly IClientRepository _clientRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly IVehicleRepository _vehicleRepository;
 
@@ -27,6 +28,7 @@ namespace OficinaWeb.Controllers
             IRepairAndServicesRepository repairAndServicesRepository,
             IMechanicRepository mechanicRepository,
             IServiceTypeRepository serviceTypeRepository,
+            IClientRepository clientRepository,
             IConverterHelper converterHelper,
             IVehicleRepository vehicleRepository)
         {
@@ -34,6 +36,7 @@ namespace OficinaWeb.Controllers
             _repairAndServicesRepository = repairAndServicesRepository;
             _mechanicRepository = mechanicRepository;
             _serviceTypeRepository = serviceTypeRepository;
+            _clientRepository = clientRepository;
             _converterHelper = converterHelper;
             _vehicleRepository = vehicleRepository;
         }
@@ -43,6 +46,7 @@ namespace OficinaWeb.Controllers
         {
             return View(_repairAndServicesRepository
                 .GetAll()
+                .Where(r => r.EndDate > DateTime.Now)
                 .Include(r => r.Client)
                 .Include(r => r.Vehicle)
                 .Include(r => r.Vehicle.CarBrand)
@@ -53,7 +57,7 @@ namespace OficinaWeb.Controllers
         }
 
         // GET: RepairAndServices/Details/5
-        public async Task<IActionResult> Details(int? id, bool fromMyServices = false)
+        public async Task<IActionResult> Details(int? id, bool fromMyServices = false, int? vehicleId = null)
         {
             if (id == null)
             {
@@ -67,6 +71,9 @@ namespace OficinaWeb.Controllers
             }
 
             ViewData["FromMyServices"] = fromMyServices;
+            ViewData["VehicleId"] = vehicleId;
+
+
 
             return View(repairAndServices);
         }
@@ -214,40 +221,95 @@ namespace OficinaWeb.Controllers
 
 
 
-        [Authorize(Roles ="Employee")]
-        public async Task<IActionResult> MyServices(string email)
+        [Authorize(Roles ="Employee,Client")]
+        public async Task<IActionResult> MyServices(string email, int? id)
         {
             email = User.Identity.Name;
 
-            var mechanic = await  _mechanicRepository.GetByEmailAsync(email);
 
-            if (mechanic == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
+            if (this.User.IsInRole("Employee"))
+            { 
+                var mechanic = await  _mechanicRepository.GetByEmailAsync(email);
 
-
-            var services = await _repairAndServicesRepository.GetAll()
-                .Where(r => r.Mechanics.Any(m => m.Id == mechanic.Id) && r.EndDate < DateTime.Now)
-                .Include(r => r.ServiceType)
-                .Include(r => r.Client)
-                .Include(r => r.Vehicle)
-                 .ThenInclude(v => v.CarBrand)
-                 .Include(r => r.Vehicle)
-                 .ThenInclude(v => v.CarModel)
-                .Include(r => r.Parts)
-                .Include(r => r.Mechanics)
-                .ToListAsync();
-
-            if(services != null)
-            {
-                var model = new MyServicesViewModel
+                if (mechanic == null)
                 {
-                    MyServices = services.ToList()
-                };
+                   var services = await _repairAndServicesRepository.GetAll()
+                    .Where(r => r.EndDate < DateTime.Now)
+                    .Include(r => r.ServiceType)
+                    .Include(r => r.Client)
+                    .Include(r => r.Vehicle)
+                     .ThenInclude(v => v.CarBrand)
+                     .Include(r => r.Vehicle)
+                     .ThenInclude(v => v.CarModel)
+                    .Include(r => r.Parts)
+                    .Include(r => r.Mechanics)
+                    .ToListAsync();
 
-                return View(model);
+                    if (services != null)
+                    {
+                        var model = new MyServicesViewModel
+                        {
+                            MyServices = services.ToList()
+                        };
+
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    var services = await _repairAndServicesRepository.GetAll()
+                       .Where(r => r.Mechanics.Any(m => m.Id == mechanic.Id) && r.EndDate < DateTime.Now)
+                       .Include(r => r.ServiceType)
+                       .Include(r => r.Client)
+                       .Include(r => r.Vehicle)
+                        .ThenInclude(v => v.CarBrand)
+                        .Include(r => r.Vehicle)
+                        .ThenInclude(v => v.CarModel)
+                       .Include(r => r.Parts)
+                       .Include(r => r.Mechanics)
+                       .ToListAsync();
+
+                    if (services != null)
+                    {
+                        var model = new MyServicesViewModel
+                        {
+                            MyServices = services.ToList()
+                        };
+
+                        return View(model);
+                    }
+                }
+
+                   
             }
+
+
+            if (this.User.IsInRole("Client"))
+            {
+
+                var services = await _repairAndServicesRepository.GetAll()
+                    .Where(r => r.VehicleId == id && r.EndDate < DateTime.Now)
+                    .Include(r => r.ServiceType)
+                    .Include(r => r.Client)
+                    .Include(r => r.Vehicle)
+                     .ThenInclude(v => v.CarBrand)
+                     .Include(r => r.Vehicle)
+                     .ThenInclude(v => v.CarModel)
+                    .Include(r => r.Parts)
+                    .Include(r => r.Mechanics)
+                    .ToListAsync();
+
+                if (services != null)
+                {
+                    var model = new MyServicesViewModel
+                    {
+                        MyServices = services.ToList()
+                    };
+
+                    return View(model);
+                }
+            }
+
 
 
             return RedirectToAction("Index", "Home");

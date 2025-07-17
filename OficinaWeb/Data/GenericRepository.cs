@@ -39,7 +39,7 @@ namespace OficinaWeb.Data
             await SaveAllAsync();
         }
 
-        public async Task DeleteAsync(T entity)
+        public  async Task DeleteAsync(T entity)
         {
             _context.Set<T>().Remove(entity);
             await SaveAllAsync();
