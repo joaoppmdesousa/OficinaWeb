@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
@@ -55,13 +56,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarBrandNotFound");
             }
 
             var carBrand = await _carBrandRepository.GetIdAsync(id.Value);
             if (carBrand == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarBrandNotFound");
             }
             return View(carBrand);
         }
@@ -75,7 +76,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != carBrand.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarBrandNotFound");
             }
 
             if (ModelState.IsValid)
@@ -105,13 +106,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarBrandNotFound");
             }
 
             var carBrand = await _carBrandRepository.GetIdAsync(id.Value);
             if (carBrand == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarBrandNotFound");
             }
 
             return View(carBrand);
@@ -125,6 +126,15 @@ namespace OficinaWeb.Controllers
             var carBrand = await _carBrandRepository.GetIdAsync(id);
             await _carBrandRepository.DeleteAsync(carBrand);
             return RedirectToAction(nameof(Index));
-        }     
+        }
+
+
+        public IActionResult CarBrandNotFound()
+        {
+            return View();
+        }
+
+
+
     }
 }

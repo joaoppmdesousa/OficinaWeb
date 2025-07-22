@@ -61,13 +61,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceNotFound");
             }
 
             var repairAndServices = await _repairAndServicesRepository.GetWithIncludesAsync(id.Value);
             if (repairAndServices == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceNotFound");
             }
 
             ViewData["FromMyServices"] = fromMyServices;
@@ -129,13 +129,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceNotFound");
             }
 
             var repairAndServices = await _repairAndServicesRepository.GetWithIncludesAsync(id.Value);
             if (repairAndServices == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceNotFound");
             }
 
             var model = _converterHelper.ToRepairAndServicesViewModel(repairAndServices);
@@ -160,7 +160,7 @@ namespace OficinaWeb.Controllers
 
             if (id != repairAndServices.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceNotFound");
             }
           
 
@@ -175,7 +175,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (! await _repairAndServicesRepository.ExistsAsync(repairAndServices.Id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("ServiceNotFound");
                     }
                     else
                     {
@@ -193,13 +193,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceNotFound");
             }
 
             var repairAndServices = await _repairAndServicesRepository.GetWithIncludesAsync(id.Value);
             if (repairAndServices == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceNotFound");
             }
 
             return View(repairAndServices);
@@ -213,7 +213,10 @@ namespace OficinaWeb.Controllers
             var result = await _repairAndServicesRepository.RemoveRepairAndServicesAsync(id);
 
             if (!result)
-                return NotFound();
+            {
+                return new NotFoundViewResult("ServiceNotFound");
+            }
+                
 
             return RedirectToAction(nameof(Index));
 
@@ -222,9 +225,9 @@ namespace OficinaWeb.Controllers
 
 
         [Authorize(Roles ="Employee,Client")]
-        public async Task<IActionResult> MyServices(string email, int? id)
+        public async Task<IActionResult> MyServices(int? id)
         {
-            email = User.Identity.Name;
+           var email = User.Identity.Name;
 
 
             if (this.User.IsInRole("Employee"))
@@ -287,6 +290,13 @@ namespace OficinaWeb.Controllers
             if (this.User.IsInRole("Client"))
             {
 
+                var vehicleExists = await _vehicleRepository.ExistsAsync(id.Value);
+
+                if (id == null || !vehicleExists)
+                {
+                    return NotFound();
+                }
+
                 var services = await _repairAndServicesRepository.GetAll()
                     .Where(r => r.VehicleId == id && r.EndDate < DateTime.Now)
                     .Include(r => r.ServiceType)
@@ -315,6 +325,18 @@ namespace OficinaWeb.Controllers
             return RedirectToAction("Index", "Home");
 
         }
+
+
+
+
+
+        public IActionResult ServiceNotFound()
+        {
+            return View();
+        }
+
+
+
 
     }
 

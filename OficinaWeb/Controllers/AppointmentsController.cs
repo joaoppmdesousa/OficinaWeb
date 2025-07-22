@@ -95,14 +95,14 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AppointmentNotFound");
             }
 
             var appointment = await _appointmentsRepository.GetByIdAsyncWithIncludes(id.Value);
 
             if (appointment == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AppointmentNotFound");
             }
 
             return View(appointment);
@@ -113,6 +113,7 @@ namespace OficinaWeb.Controllers
         {
             var clients = _clientRepository.GetAll()?.ToList() ?? new List<Client>();
             var appointments = _appointmentsRepository.GetAll()?.ToList() ?? new List<Appointment>();
+            var mechanics = _mechanicRepository.GetComboProducts();
 
             var model = new AppointmentViewModel
             {
@@ -120,15 +121,10 @@ namespace OficinaWeb.Controllers
                 Appointments = appointments,
                 Date = DateTime.Now,
                 AppointmentEnd = DateTime.Now.AddHours(1).TimeOfDay,
-            };
+                MechanicsList = mechanics
+            };    
 
-            var mechanics =  _mechanicRepository.GetAll()?.ToList() ?? new List<Mechanic>();
-            var vehicles = _vehicleRepository.GetAll()?.ToList() ?? new List<Vehicle>(); ;
 
-            ViewBag.MechanicId = new SelectList(mechanics, "Id", "Name");
-            ViewBag.VehicleId = new SelectList(vehicles, "Id", "CarBrand");
-
-       
 
             return View(model);
         }
@@ -148,13 +144,11 @@ namespace OficinaWeb.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var mechanics = await _mechanicRepository.GetAll().ToListAsync();
-            var vehicles = await _vehicleRepository.GetAll().ToListAsync();
+            var mechanics =  _mechanicRepository.GetComboProducts();
 
-            ViewBag.MechanicId = new SelectList(mechanics, "Id", "Name");
-            ViewBag.VehicleId = new SelectList(vehicles, "Id", "Brand");
+            model.MechanicsList = mechanics;
 
-            model.Clients = _clientRepository.GetAll().ToList();
+            model.Clients = await _clientRepository.GetAll().ToListAsync();
             model.Appointments = _appointmentsRepository.GetAll().ToList();
 
 
@@ -166,24 +160,40 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AppointmentNotFound");
             }
 
             var appointment = await _appointmentsRepository.GetByIdAsyncWithIncludes(id.Value);
             if (appointment == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AppointmentNotFound");
             }
 
             var model =  _converterHelper.ToAppointmentViewModel(appointment);
 
-            model.Clients = _clientRepository.GetAll().ToList();
+            var mechanics = _mechanicRepository.GetComboProducts();
 
-            var mechanics = await _mechanicRepository.GetAll().ToListAsync();
-            var vehicles = await _vehicleRepository.GetAll().ToListAsync();
+            var vehicles = _vehicleRepository.GetAll()
+                .Include(v => v.CarBrand)
+                .Include(v => v.CarModel)
+                .Where(v => v.ClientId == model.ClientId)
+                .ToList();
 
-            ViewData["MechanicId"] = new SelectList(mechanics, "Id", "Name", appointment.MechanicId);
-            ViewData["VehicleId"] = new SelectList(vehicles, "Id", "Brand", appointment.VehicleId);
+            var vehiclesCombo = vehicles.Select(v => new SelectListItem
+            {
+                Text = v.VehicleDescription, 
+                Value = v.Id.ToString()
+            }).ToList();
+
+            var clients = _clientRepository.GetAll().ToList();
+
+
+
+            model.MechanicsList = mechanics;
+            model.VehiclesList = vehiclesCombo;
+
+            model.Clients = clients;
+
 
             return View(model);
         }
@@ -197,7 +207,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != model.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("AppointmentNotFound");
             }
 
             var appointment = _converterHelper.ToAppointment(model, false);
@@ -214,7 +224,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (! await _appointmentsRepository.ExistsAsync(model.Id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("AppointmentNotFound");
                     }
                     else
                     {
@@ -224,12 +234,24 @@ namespace OficinaWeb.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var mechanics = await _mechanicRepository.GetAll().ToListAsync();
-            var vehicles = await _vehicleRepository.GetAll().ToListAsync();
+            var mechanics = _mechanicRepository.GetComboProducts();
 
-            ViewData["MechanicId"] = new SelectList(mechanics, "Id", "Name", model.MechanicId);
-            ViewData["VehicleId"] = new SelectList(vehicles, "Id", "Brand", model.VehicleId);
+            var vehicles = _vehicleRepository.GetAll()
+               .Include(v => v.CarBrand)
+               .Include(v => v.CarModel)
+               .Where(v => v.ClientId == model.ClientId)
+               .ToList();
 
+            var vehiclesCombo = vehicles.Select(v => new SelectListItem
+            {
+                Text = v.VehicleDescription,
+                Value = v.Id.ToString()
+            }).ToList();
+
+
+            model.MechanicsList = mechanics;
+            model.VehiclesList = vehiclesCombo;
+            
 
             model.Clients = _clientRepository.GetAll().ToList();
             model.Client = await _clientRepository.GetIdAsync(appointment.ClientId);
@@ -243,13 +265,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AppointmentNotFound");
             }
 
             var appointment = await _appointmentsRepository.GetByIdAsyncWithIncludes(id.Value);
             if (appointment == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AppointmentNotFound");
             }
 
             return View(appointment);
@@ -265,7 +287,7 @@ namespace OficinaWeb.Controllers
                 var appointment = await _appointmentsRepository.GetByIdAsyncWithIncludes(id.Value);
                 if (appointment == null)
                 {
-                    return NotFound();
+                    return new NotFoundViewResult("AppointmentNotFound");
                 }
                 var response = await _communicationHelper.CancelAppointmentNotificationAsync(appointment.Id);
                 if (!response)
@@ -374,10 +396,18 @@ namespace OficinaWeb.Controllers
 
 
 
-                return NotFound();
+            return RedirectToAction(nameof(Index));
         }
           
 
+
+
+
+
+        public IActionResult AppointmentNotFound()
+        {
+            return View();
+        }
 
 
     }

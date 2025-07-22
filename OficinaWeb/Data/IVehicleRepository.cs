@@ -11,5 +11,6 @@ namespace OficinaWeb.Data
         public Task<Client> GetClientAsync(int clientId);
 
         public Task<Vehicle> GetByIdAsyncWithIncludes(int id);
+
     }
 }

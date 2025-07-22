@@ -16,7 +16,7 @@
 
             <div class="form-group">
                 <label asp-for="MechanicId" class="control-label"></label>
-                <select asp-for="MechanicId" class="form-control" asp-items="ViewBag.MechanicId"></select>
+                <select asp-for="MechanicId" class="form-control" asp-items="Model.MechanicsList"></select>
                 <span asp-validation-for="MechanicId" class="text-danger"></span>
             </div>
 
@@ -60,7 +60,7 @@
 
             <div class="form-group">
                 <label asp-for="VehicleId" class="control-label"></label>
-                <select asp-for="VehicleId" class="form-control" asp-items="ViewBag.VehicleId" ></select>
+                <select asp-for="VehicleId" class="form-control" asp-items="Model.VehiclesList"> ></select>
                 <span asp-validation-for="VehicleId" class="text-danger"></span>
             </div>
             

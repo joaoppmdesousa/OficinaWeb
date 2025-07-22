@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
@@ -29,14 +30,16 @@ namespace OficinaWeb.Controllers
         // GET: Parts
         public async Task<IActionResult> Index(int? serviceId )
         {
+            var serviceExists = await  _repairAndServicesRepository.ExistsAsync(serviceId.Value);
 
-            if (serviceId == null)
+            if (serviceId == null || !serviceExists)
             {
                 return NotFound();
             }
 
             
             ViewBag.ServiceId = serviceId;
+
             var parts = await _partsRepository
            .GetAll()
            .Where(p => p.RepairAndServicesId == serviceId.Value)
@@ -52,27 +55,34 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
+                return new NotFoundViewResult("PartNotFound");
+            }
+
+            var serviceExists = await _repairAndServicesRepository.ExistsAsync(serviceId);
+
+            if (!serviceExists)
+            {
                 return NotFound();
             }
 
             ViewBag.ServiceId = serviceId;
 
-            var part = await _context.Parts
-                .Include(p => p.RepairAndServices)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var part = await _partsRepository.GetWithIncludesAsync(id.Value);
             if (part == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("PartNotFound");
             }
 
             return View(part);
         }
 
         // GET: Parts/Create
-        public IActionResult Create(int? serviceId)
+        public async Task<IActionResult> Create(int? serviceId)
         {
 
-            if (serviceId == null)
+            var serviceExists = await _repairAndServicesRepository.ExistsAsync(serviceId.Value);
+
+            if (serviceId == null || !serviceExists)
             {
                 return NotFound();
             }
@@ -87,12 +97,11 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Quantity,UnitPrice,RepairAndServicesId")] Part part)
+        public async Task<IActionResult> Create( Part part)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(part);
-                await _context.SaveChangesAsync();
+                await _partsRepository.CreateAsync(part);
                 return RedirectToAction("Index", new { serviceId = part.RepairAndServicesId });
             }
            
@@ -102,17 +111,24 @@ namespace OficinaWeb.Controllers
         // GET: Parts/Edit/5
         public async Task<IActionResult> Edit(int? id, int serviceId)
         {
-            if (id == null)
+            var serviceExists = await _repairAndServicesRepository.ExistsAsync(serviceId);
+
+            if (!serviceExists)
             {
                 return NotFound();
             }
 
+            if (id == null)
+            {
+                return new NotFoundViewResult("PartNotFound");
+            }
+
             ViewBag.ServiceId = serviceId;
 
-            var part = await _context.Parts.FindAsync(id);
+            var part = await _partsRepository.GetWithIncludesAsync(id.Value);
             if (part == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("PartNotFound");
             }
            
             return View(part);
@@ -123,25 +139,24 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Quantity,UnitPrice,RepairAndServicesId")] Part part)
+        public async Task<IActionResult> Edit(int id, Part part)
         {
             if (id != part.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("PartNotFound");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(part);
-                    await _context.SaveChangesAsync();
+                    await _partsRepository.CreateAsync(part); 
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PartExists(part.Id))
+                    if (! await _partsRepository.ExistsAsync(id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("PartNotFound");
                     }
                     else
                     {
@@ -157,19 +172,24 @@ namespace OficinaWeb.Controllers
         // GET: Parts/Delete/5
         public async Task<IActionResult> Delete(int? id, int serviceId)
         {
-            if (id == null)
+            var serviceExists = await _repairAndServicesRepository.ExistsAsync(serviceId);
+
+            if (!serviceExists)
             {
                 return NotFound();
             }
 
+            if (id == null)
+            {
+                return new NotFoundViewResult("PartNotFound");
+            }
+
             ViewBag.ServiceId = serviceId;
 
-            var part = await _context.Parts
-                .Include(p => p.RepairAndServices)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var part = await _partsRepository.GetWithIncludesAsync(id.Value);
             if (part == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("PartNotFound");
             }
 
             return View(part);
@@ -180,15 +200,17 @@ namespace OficinaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var part = await _context.Parts.FindAsync(id);
-            _context.Parts.Remove(part);
-            await _context.SaveChangesAsync();
+            var part = await _partsRepository.GetWithIncludesAsync(id);
+            await _partsRepository.DeleteAsync(part);
             return RedirectToAction("Index", new { serviceId = part.RepairAndServicesId });
         }
 
-        private bool PartExists(int id)
+       
+
+
+        public IActionResult PartNotFound()
         {
-            return _context.Parts.Any(e => e.Id == id);
+            return View();
         }
     }
 }

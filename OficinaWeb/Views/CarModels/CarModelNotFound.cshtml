@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewData["Title"] = "CarModelNotFound";
+}
+
+
+<div class="container text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 70vh;">
+    <div>
+        <h1 class="display-4 text-danger">Oops!</h1>
+        <h2 class="mb-4">Car Model Not Found</h2>
+        <p class="lead">We couldn't find the car model you're looking for. It may have been removed or never existed.</p>
+
+        <a asp-controller="CarBrands" asp-action="Index" class="btn btn-outline-primary mt-4">
+           Back to Car Brands
+        </a>
+    </div>
+</div>

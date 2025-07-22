@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
@@ -56,13 +57,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceTypeNotFound");
             }
 
             var serviceType = await _serviceTypeRepository.GetIdAsync(id.Value);
             if (serviceType == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceTypeNotFound");
             }
             return View(serviceType);
         }
@@ -76,7 +77,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != serviceType.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceTypeNotFound");
             }
 
             if (ModelState.IsValid)
@@ -89,7 +90,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (! await _serviceTypeRepository.ExistsAsync(id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("ServiceTypeNotFound");
                     }
                     else
                     {
@@ -106,13 +107,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceTypeNotFound");
             }
 
             var serviceType = await _serviceTypeRepository.GetIdAsync(id.Value);
             if (serviceType == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ServiceTypeNotFound");
             }
 
             return View(serviceType);
@@ -127,6 +128,13 @@ namespace OficinaWeb.Controllers
             await _serviceTypeRepository.DeleteAsync(serviceType);
             return RedirectToAction(nameof(Index));
         }
+
+
+        public IActionResult ServiceTypeNotFound()
+        {
+            return View();
+        }
+
 
     }
 }

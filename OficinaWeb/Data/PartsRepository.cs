@@ -20,5 +20,12 @@ namespace OficinaWeb.Data
                  .FirstOrDefaultAsync(s => s.Id == serviceId);
         }
 
+        public async Task<Part> GetWithIncludesAsync(int id)
+        {
+            return await _context.Parts
+             .Include(p => p.RepairAndServices)
+             .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
     }
 }

@@ -74,13 +74,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ClientNotFound");
             }
 
             var client = await _clientRepository.GetIdAsync(id.Value);
             if (client == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ClientNotFound");
             }
 
             return View(client);
@@ -118,13 +118,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ClientNotFound");
             }
 
             var client = await _clientRepository.GetIdAsync(id.Value);
             if (client == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ClientNotFound");
             }
             return View(client);
         }
@@ -140,7 +140,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != client.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("ClientNotFound");
             }
 
             if (ModelState.IsValid)
@@ -153,7 +153,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (! await _clientRepository.ExistsAsync(client.Id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("ClientNotFound");
                     }
                     else
                     {
@@ -171,13 +171,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ClientNotFound");
             }
 
             var client = await _clientRepository.GetIdAsync(id.Value);
             if (client == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("ClientNotFound");
             }
 
             return View(client);
@@ -213,6 +213,12 @@ namespace OficinaWeb.Controllers
 
             return Json(clients);
         }
+
+        public IActionResult ClientNotFound()
+        {
+            return View();
+        }
+
 
 
     }

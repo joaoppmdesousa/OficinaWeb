@@ -50,13 +50,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("MechanicNotFound");
             }
 
             var mechanic = await _mechanicRepository.GetByIdAsyncWithIncludes(id.Value);
             if (mechanic == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("MechanicNotFound");
             }
 
             return View(mechanic);
@@ -98,13 +98,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("MechanicNotFound");
             }
 
             var mechanic = await _mechanicRepository.GetIdAsync(id.Value);
             if (mechanic == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("MechanicNotFound"); ;
             }
 
             ViewData["MechanicSpecialtyId"] = new SelectList(_context.Specialties, "Id", "Name", mechanic.MechanicSpecialtyId);
@@ -122,7 +122,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != mechanic.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("MechanicNotFound");
             }
 
             if (ModelState.IsValid)
@@ -136,7 +136,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (!await _mechanicRepository.ExistsAsync(id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("MechanicNotFound");
                     }
                     else
                     {
@@ -157,13 +157,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("MechanicNotFound");
             }
 
             var mechanic = await _mechanicRepository.GetIdAsync(id.Value);
             if (mechanic == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("MechanicNotFound");
             }
 
             return View(mechanic);
@@ -275,6 +275,13 @@ namespace OficinaWeb.Controllers
             return View(appointmentsViewModel);
 
         }
+
+
+        public IActionResult MechanicNotFound()
+        {
+            return View();
+        }
+
 
 
     }

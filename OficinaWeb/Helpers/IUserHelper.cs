@@ -40,6 +40,10 @@ namespace OficinaWeb.Helpers
         Task<bool> CheckPasswordAsync(User user, string password);
 
 
+        Task<string> GeneratePasswordResetTokenAsync(User user);
+
+        Task<IdentityResult> ResetPasswordAsync(User user, string token, string password);
+
 
     }
 }

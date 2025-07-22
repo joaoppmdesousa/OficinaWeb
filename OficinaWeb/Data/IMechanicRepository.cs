@@ -1,4 +1,5 @@
-﻿using OficinaWeb.Data.Entities;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using OficinaWeb.Data.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,6 +14,9 @@ namespace OficinaWeb.Data
 
 
         Task<Mechanic> GetByEmailAsync(string email);
+
+
+        IEnumerable<SelectListItem> GetComboProducts();
 
     }
 }

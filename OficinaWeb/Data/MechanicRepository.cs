@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,16 @@ namespace OficinaWeb.Data
             return mechanic;
         }
 
+        public IEnumerable<SelectListItem> GetComboProducts()
+        {
+            var list = _context.Mechanics.Select(p => new SelectListItem
+            {
+                Text = p.Name,
+                Value = p.Id.ToString()
+            }).ToList();         
+
+            return list;
+        }
 
     }
 }

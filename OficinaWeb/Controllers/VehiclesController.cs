@@ -72,13 +72,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("VehicleNotFound");
             }
 
             var vehicle = await _vehicleRepository.GetIdAsync(id.Value);
             if (vehicle == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("VehicleNotFound");
             }
 
             ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "Vehicles", new { clientId = vehicle.ClientId });
@@ -100,7 +100,7 @@ namespace OficinaWeb.Controllers
                 return NotFound();
             }
 
-            ViewBag.ClientId = client.Id;
+            //ViewBag.ClientId = client.Id;
 
             var model = new VehicleViewModel
             {
@@ -141,13 +141,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("VehicleNotFound");
             }
 
             var vehicle = await _vehicleRepository.GetByIdAsyncWithIncludes(id.Value);
             if (vehicle == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("VehicleNotFound");
             }
 
             ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "Vehicles", new { clientId = vehicle.ClientId });
@@ -176,7 +176,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != model.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("VehicleNotFound");
             }
 
             if (ModelState.IsValid)
@@ -193,7 +193,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (!await _vehicleRepository.ExistsAsync(vehicle.Id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("VehicleNotFound");
                     }
                     else
                     {
@@ -221,13 +221,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("VehicleNotFound");
             }
 
             var vehicle = await _vehicleRepository.GetIdAsync(id.Value);
             if (vehicle == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("VehicleNotFound");
             }
 
             ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "Vehicles", new { clientId = vehicle.ClientId });
@@ -246,9 +246,9 @@ namespace OficinaWeb.Controllers
         }
 
 
-        public async Task<IActionResult> MyVehicles(string email)
+        public async Task<IActionResult> MyVehicles()
         {
-            email = User.Identity.Name;
+            var email = User.Identity.Name;
 
             var client = await _clientRepository.GetByEmailAsync(email);
 
@@ -309,6 +309,13 @@ namespace OficinaWeb.Controllers
                 .ToList();
 
             return Json(carModels);
+        }
+
+
+
+        public IActionResult VehicleNotFound()
+        {
+            return View();
         }
 
     }

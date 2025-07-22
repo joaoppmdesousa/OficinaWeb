@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data.Entities;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OficinaWeb.Data
@@ -22,5 +25,7 @@ namespace OficinaWeb.Data
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
+
+
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,13 +57,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("SpecialitiesNotFound");
             }
 
             var mechanicSpecialty = await _specialtiesRepository.GetIdAsync(id.Value);
             if (mechanicSpecialty == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("SpecialitiesNotFound");
             }
             return View(mechanicSpecialty);
         }
@@ -76,7 +77,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != mechanicSpecialty.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("SpecialitiesNotFound");
             }
 
             if (ModelState.IsValid)
@@ -89,7 +90,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (! await _specialtiesRepository.ExistsAsync(mechanicSpecialty.Id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("SpecialitiesNotFound");
                     }
                     else
                     {
@@ -106,13 +107,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("SpecialitiesNotFound");
             }
 
             var mechanicSpecialty = await _specialtiesRepository.GetIdAsync(id.Value);
             if (mechanicSpecialty == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("SpecialitiesNotFound");
             }
 
             return View(mechanicSpecialty);
@@ -127,6 +128,13 @@ namespace OficinaWeb.Controllers
             await _specialtiesRepository.DeleteAsync(mechanicSpecialty);
             return RedirectToAction(nameof(Index));
         }
+
+
+        public IActionResult SpecialitiesNotFound()
+        {
+            return View();
+        }
+
 
     }
 }

@@ -6,5 +6,7 @@ namespace OficinaWeb.Data
     public interface IPartsRepository : IGenericRepository<Part>
     {
         public Task<RepairAndServices> GetServiceAsync(int serviceId);
+
+        Task<Part> GetWithIncludesAsync(int id);
     }
 }

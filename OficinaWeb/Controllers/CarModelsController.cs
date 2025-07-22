@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
+using OficinaWeb.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
@@ -57,7 +58,7 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,CarBrandId")] CarModel carModel)
+        public async Task<IActionResult> Create( CarModel carModel)
         {
             if (ModelState.IsValid)
             {
@@ -73,7 +74,7 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarModelNotFound");
             }
 
             ViewBag.CarBrandId = brandId;
@@ -81,7 +82,7 @@ namespace OficinaWeb.Controllers
             var carModel = await _carModelRepository.GetIdAsync(id.Value);
             if (carModel == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarModelNotFound");
             }
 
             return View(carModel);
@@ -96,7 +97,7 @@ namespace OficinaWeb.Controllers
         {
             if (id != carModel.Id)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarModelNotFound");
             }
 
             if (ModelState.IsValid)
@@ -109,7 +110,7 @@ namespace OficinaWeb.Controllers
                 {
                     if (! await _carModelRepository.ExistsAsync(id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("CarModelNotFound");
                     }
                     else
                     {
@@ -127,13 +128,13 @@ namespace OficinaWeb.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarModelNotFound");
             }
 
             var carModel = await _carModelRepository.GetIdAsync(id.Value);
             if (carModel == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("CarModelNotFound");
             }
 
             return View(carModel);
@@ -149,6 +150,14 @@ namespace OficinaWeb.Controllers
 
             return RedirectToAction("Index", new { brandId = carModel.CarBrandId });
         }
+
+
+        public IActionResult CarModelNotFound()
+        {
+
+            return View();
+        }
+
 
     }
 }

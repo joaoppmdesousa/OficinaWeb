@@ -1,0 +1,188 @@
+﻿@model OficinaWeb.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+
+}
+
+<h1>Dashboard</h1>
+
+<br />
+
+<div class=" control-section">
+    <!--  DashboardLayout element declaration -->
+    <ejs-dashboardlayout id="defaultLayout" columns="6" cellSpacing="Model.cellSpacing">
+        <e-content-template>
+
+            <div id="one" class="e-panel" data-row="0" data-col="0" data-sizeX="4" data-sizeY="2" allowresizing="true">
+                <div class="e-panel-container">
+                    <div>
+                        <h5 class="text-info">On Going Services</h5>
+                        <div class="table-wrapper">
+                        <table class="table table-bordered table-striped table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>                                    
+                                    <th>Client</th>
+                                    <th>Vehicle</th>
+                                    <th>Mechanics</th>
+                                    <th>End</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Services)
+                                {
+                                    <tr>
+                                        <td>@item.ServiceType?.Name</td>
+                                        <td>@item.Client?.Name</td>
+                                        <td>@item.Vehicle?.VehicleDescription</td>
+                                        <td>@item.MechanicsNames</td>
+                                        <td>@item.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+            <div id="two" class="e-panel" data-row="2" data-col="0" data-sizeX="4" data-sizeY="2">
+                <div class="e-panel-container">
+                    <div>
+
+                        <h5 class="text-info">Today's Appointments</h5>
+                        <div class="table-wrapper">
+                        <table class="table table-bordered table-striped table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Client</th>
+                                    <th>Vehicle</th>
+                                    <th>Mechanic</th>
+                                    <th>Time Slot</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Appointments)
+                                {
+                                    <tr>
+                                        <td>@item.AppointmentType</td>
+                                        <td>@item.Client?.Name</td>
+                                        <td>@item.Vehicle?.VehicleDescription</td>
+                                        <td>@item.Mechanic.Name</td>
+                                        <td>@($"{item.Date:HH\\:mm} / {item.AppointmentEnd:hh\\:mm}")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="three" class="e-panel" data-row="0" data-col="4" data-sizeX="2" data-sizeY="4">
+                <div class="e-panel-container d-flex align-items-center justify-content-center">
+                    <div class="text-center w-100">
+                        <h5 class="text-info">Quick Actions</h5>
+
+                        <div class="d-flex flex-column gap-3 align-items-center">
+                            <a href="@Url.Action("Index", "Appointments")"
+                               class="btn btn-outline-primary"
+                               style="width: 80%; height: 60px;">
+                                Appointments
+                            </a>
+                            <a href="@Url.Action("AppointmentHistory", "Appointments")"
+                               class="btn btn-outline-primary"
+                               style="width: 80%; height: 60px;">
+                                Appointment History
+                            </a>
+
+                            <a href="@Url.Action("Schedule", "Mechanics")"
+                               class="btn btn-outline-primary"
+                               style="width: 80%; height: 60px;">
+                                View Schedule
+                            </a>
+
+                            <a href="@Url.Action("Index", "RepairAndServices")"
+                               class="btn btn-outline-primary"
+                               style="width: 80%; height: 60px;">
+                                Services
+                            </a>
+
+                            <a href="@Url.Action("MyServices", "RepairAndServices")"
+                               class="btn btn-outline-primary"
+                               style="width: 80%; height: 60px;">
+                                Completed Services
+                            </a>
+
+
+                              
+                        </div>
+                    </div>
+                </div>
+            </div>
+         
+        </e-content-template>
+    </ejs-dashboardlayout>
+    <!-- end of dashboardlayout element -->
+</div>
+
+<style>
+    /* DashboardLayout element styles  */
+    #defaultLayout {
+        padding: 10px;
+    }
+
+        #defaultLayout .e-panel .e-panel-container {
+            vertical-align: middle;
+            font-weight: 600;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        #defaultLayout .e-panel-container > div {
+            max-height: none;
+            overflow-y: unset;
+        }
+
+        #defaultLayout .e-panel-container table {
+            font-size: 12px;
+        }
+
+        #defaultLayout .e-panel-container .table-wrapper {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+    .text-align {
+        line-height: 160px;
+    }
+
+
+   
+    .e-panel table {
+        font-size: 12px;
+        padding: 0;
+    }
+
+       
+        .e-panel table td,
+        .e-panel table th {
+            padding: 2px 4px;
+        }
+
+
+    
+    .e-panel .e-panel-container > div {
+        max-height: 200px; 
+        overflow-y: auto;
+    }
+
+ 
+
+</style>
