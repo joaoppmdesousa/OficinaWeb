@@ -20,6 +20,7 @@ namespace OficinaWeb.Controllers
         private readonly IMechanicRepository _mechanicRepository;
         private readonly IAppointmentsRepository _appointmentsRepository;
         private readonly IConverterHelper _converterHelper;
+        private readonly IEmailHelper _emailHelper;
         private readonly IUserHelper _userHelper;
 
         public MechanicsController(
@@ -27,12 +28,14 @@ namespace OficinaWeb.Controllers
             IMechanicRepository mechanicRepository,
             IAppointmentsRepository appointmentsRepository,
             IConverterHelper converterHelper,
+            IEmailHelper emailHelper,
             IUserHelper userHelper)
         {
             _context = context;
             _mechanicRepository = mechanicRepository;
             _appointmentsRepository = appointmentsRepository;
             _converterHelper = converterHelper;
+            _emailHelper = emailHelper;
             _userHelper = userHelper;
         }
 
@@ -83,6 +86,13 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
+
+                if (_emailHelper.CheckEmailExists(mechanic.Email, 0, false))
+                {
+                    ModelState.AddModelError("Email", "This email is already in use.");
+                }
+
+
                 await _mechanicRepository.CreateAsync(mechanic);
                 return RedirectToAction(nameof(Index));
             }
@@ -127,6 +137,12 @@ namespace OficinaWeb.Controllers
 
             if (ModelState.IsValid)
             {
+
+                if (_emailHelper.CheckEmailExists(mechanic.Email, mechanic.Id, false))
+                {
+                    ModelState.AddModelError("Email", "This email is already in use.");
+                }
+
                 try
                 {
 

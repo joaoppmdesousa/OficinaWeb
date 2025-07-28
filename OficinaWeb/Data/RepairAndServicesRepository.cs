@@ -109,7 +109,14 @@ namespace OficinaWeb.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public async Task<List<Mechanic>> GetMechanicsByServiceIdAsync(int id)
+        {
+            return await _context.Mechanics.Where(m => m.RepairAndServices.Any(r => r.Id == id)).ToListAsync();
+        }
 
-
+        public async Task<List<Part>> GetPartsByServiceIdAsync(int id)
+        {
+            return await _context.Parts.Where(p => p.RepairAndServicesId == id).ToListAsync();
+        }
     }
 }

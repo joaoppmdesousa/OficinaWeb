@@ -1,12 +1,15 @@
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.CodeAnalysis.FlowAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
@@ -16,10 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using Microsoft.CodeAnalysis.FlowAnalysis;
 using System.Text;
+using System.Threading.Tasks;
+
 
 namespace OficinaWeb
 {
@@ -71,10 +73,26 @@ namespace OficinaWeb
 
             services.AddTransient<SeedDb>();
 
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
+
+            services.AddSingleton<Cloudinary>(sp =>
+            {
+                var config = sp.GetRequiredService<IOptions<CloudinarySettings>>().Value;
+                var account = new Account(config.CloudName, config.ApiKey, config.ApiSecret);
+                return new Cloudinary(account);
+            });
+
+
+
+           
+
             services.AddScoped<IUserHelper, UserHelper>();
             services.AddScoped<IConverterHelper, ConverterHelper>();
             services.AddScoped<IEmailHelper, EmailHelper>();
             services.AddScoped<ICommunicationHelper, CommunicationHelper>();
+            services.AddScoped<ICloudinaryHelper, CloudinaryHelper>();
+            services.AddScoped<ICheckAppointmentHelper, CheckAppointmentHelper>();
+
 
 
             services.AddScoped<IClientRepository, ClientRepository>();
@@ -136,5 +154,9 @@ namespace OficinaWeb
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
+
+
+
+
     }
 }

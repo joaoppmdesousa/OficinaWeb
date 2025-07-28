@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace OficinaWeb.Data.Entities
 {
@@ -13,6 +14,7 @@ namespace OficinaWeb.Data.Entities
 
         public int RepairAndServicesId { get; set; }
 
+        [JsonIgnore]
         public RepairAndServices RepairAndServices { get; set; }
 
 

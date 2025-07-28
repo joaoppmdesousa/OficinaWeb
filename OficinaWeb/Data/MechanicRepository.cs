@@ -19,7 +19,8 @@ namespace OficinaWeb.Data
         public async Task<Mechanic> GetByIdAsyncWithIncludes(int id)
         {
             return await _context.Mechanics
-               .Include(a => a.MechanicSpecialty)
+               .Include(m => m.MechanicSpecialty)
+               .Include(m => m.Appointments)
                .AsNoTracking()
                .FirstOrDefaultAsync(m => m.Id == id);
         }
@@ -41,7 +42,7 @@ namespace OficinaWeb.Data
 
         public IEnumerable<SelectListItem> GetComboProducts()
         {
-            var list = _context.Mechanics.Select(p => new SelectListItem
+            var list = _context.Mechanics.Where(p => p.Active).OrderBy(p => p.Name).Select(p => new SelectListItem
             {
                 Text = p.Name,
                 Value = p.Id.ToString()

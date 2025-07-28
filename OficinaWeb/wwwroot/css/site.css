@@ -1,109 +1,126 @@
-﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
-
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
-}
-
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
-}
-
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  font-size: 14px;
-}
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
-
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
-}
-
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
+﻿ Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. 
 
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-}
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px; /* Vertically center the text there */
+    font-family: 'Poppins', sans-serif;
 }
 
+.navbar {
+    background-color: #9370DB !important;
+}
 
+    .navbar .container {
+        max-width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        display: flex;
+        align-items: center;
+    }
 
-
-
-
-
-
-
-
-
-
-/* 404 error page
--------------------------------------------------- */
-
-.error404-container {
-    background-color: #001f3f;
-    color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-align: center;
-    padding: 3rem 1rem;
-    min-height: 100vh;
+.navbar-brand {
+    margin-right: auto;
+    margin-left: 0;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
 }
 
-    .error404-container h1 {
-        font-size: 3rem;
-        margin-bottom: 2rem;
+.navbar-brand {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #4B0082 !important;
+    white-space: normal;
+    text-align: center;
+    word-break: break-word;
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+    .nav-link:hover {
+        color: #dcdcdc !important;
     }
 
-    .error404-container svg {
-        max-width: 80vw;
-        height: auto;
-        margin-top: 2rem;
+.dropdown-menu {
+    background-color: #ffffff;
+}
+
+.dropdown-item:hover {
+    background-color: #9370DB;
+    color: white !important;
+}
+
+.footer a {
+    color: #4B0082;
+    text-decoration: none;
+}
+
+    .footer a:hover {
+        text-decoration: underline;
     }
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+ Sticky footer 
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+     404 error page
+-------------------------------------------------- 
+
+    .error404-container {
+        background-color: #001f3f;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+        padding: 3rem 1rem;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .error404-container h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .error404-container svg {
+            max-width: 80vw;
+            height: auto;
+            margin-top: 2rem;
+        }
+
+
+

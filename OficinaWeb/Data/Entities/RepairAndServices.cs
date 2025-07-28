@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace OficinaWeb.Data.Entities
 {
@@ -15,14 +16,18 @@ namespace OficinaWeb.Data.Entities
         [Display(Name = "Type")]
         public int ServiceTypeId { get; set; }
 
+
+        [JsonIgnore]
         public ServiceType ServiceType { get; set; }
 
         public string Details { get; set; }
 
         [Required]
         [Display(Name = "Client")]
-        public int ClientId { get; set; }  
+        public int ClientId { get; set; }
 
+
+        [JsonIgnore]
         public Client Client { get; set; }
 
 
@@ -30,6 +35,8 @@ namespace OficinaWeb.Data.Entities
         [Display(Name = "Vehicle")]
         public int VehicleId { get; set; }
 
+
+        [JsonIgnore]
         public Vehicle Vehicle { get; set; }
 
 
@@ -45,13 +52,14 @@ namespace OficinaWeb.Data.Entities
         [Display(Name = "Price")]
         public decimal ServicePrice { get; set; }
 
- 
+        [JsonIgnore]
         public List<Mechanic> Mechanics { get; set; }
 
 
         [NotMapped]
         [Required(ErrorMessage = "Select at least 1 mechanic.")]
         public List<int> MechanicIds { get; set; }
+
 
         public List<Part> Parts { get; set; }
 

@@ -18,15 +18,18 @@ namespace OficinaWeb.Controllers
     {
         private readonly IClientRepository _clientRepository;
         private readonly IUserHelper _userHelper;
+        private readonly IEmailHelper _emailHelper;
         private readonly DataContext _context;
 
         public ClientsController(
             IClientRepository clientRepository,
             IUserHelper userHelper,
+            IEmailHelper emailHelper,
             DataContext context)
         {
             _clientRepository = clientRepository;
             _userHelper = userHelper;
+            _emailHelper = emailHelper;
             _context = context;
         }
 
@@ -101,11 +104,16 @@ namespace OficinaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Contact,TaxNumber,Email")] Client client)
+        public async Task<IActionResult> Create( Client client)
         {
             if (ModelState.IsValid)
             {
-              
+
+                if (_emailHelper.CheckEmailExists(client.Email, 0, true))
+                {
+                    ModelState.AddModelError("Email", "This email is already in use.");
+                }
+
                 await _clientRepository.CreateAsync(client);
                 return RedirectToAction(nameof(Index));
             }
@@ -145,6 +153,12 @@ namespace OficinaWeb.Controllers
 
             if (ModelState.IsValid)
             {
+
+                if (_emailHelper.CheckEmailExists(client.Email, client.Id, true))
+                {
+                    ModelState.AddModelError("Email", "This email is already in use.");
+                }
+
                 try
                 {
                     await _clientRepository.UpdateAsync(client);

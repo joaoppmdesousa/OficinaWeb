@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
 using OficinaWeb.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace OficinaWeb.Controllers
 {
@@ -30,7 +32,9 @@ namespace OficinaWeb.Controllers
             IServiceTypeRepository serviceTypeRepository,
             IClientRepository clientRepository,
             IConverterHelper converterHelper,
-            IVehicleRepository vehicleRepository)
+            
+            IVehicleRepository vehicleRepository
+             )
         {
             _context = context;
             _repairAndServicesRepository = repairAndServicesRepository;
@@ -297,23 +301,25 @@ namespace OficinaWeb.Controllers
                     return NotFound();
                 }
 
-                var services = await _repairAndServicesRepository.GetAll()
-                    .Where(r => r.VehicleId == id && r.EndDate < DateTime.Now)
-                    .Include(r => r.ServiceType)
-                    .Include(r => r.Client)
-                    .Include(r => r.Vehicle)
-                     .ThenInclude(v => v.CarBrand)
-                     .Include(r => r.Vehicle)
-                     .ThenInclude(v => v.CarModel)
-                    .Include(r => r.Parts)
-                    .Include(r => r.Mechanics)
-                    .ToListAsync();
+                var services = await VehicleInterventions(id.Value);
+
+                //_repairAndServicesRepository.GetAll()
+                //    .Where(r => r.VehicleId == id && r.EndDate < DateTime.Now)
+                //    .Include(r => r.ServiceType)
+                //    .Include(r => r.Client)
+                //    .Include(r => r.Vehicle)
+                //     .ThenInclude(v => v.CarBrand)
+                //     .Include(r => r.Vehicle)
+                //     .ThenInclude(v => v.CarModel)
+                //    .Include(r => r.Parts)
+                //    .Include(r => r.Mechanics)
+                //    .ToListAsync();
 
                 if (services != null)
                 {
                     var model = new MyServicesViewModel
                     {
-                        MyServices = services.ToList()
+                        MyServices = services.Where(r => r.EndDate < DateTime.Now).ToList()
                     };
 
                     return View(model);
@@ -325,6 +331,42 @@ namespace OficinaWeb.Controllers
             return RedirectToAction("Index", "Home");
 
         }
+
+
+
+
+
+        public async Task<List<RepairAndServices>> VehicleInterventions(int vehicleId)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://localhost:44311/");
+
+                
+                var response = await client.GetAsync($"api/VehicleInterventions?vehicleId={vehicleId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    var interventions = JsonConvert.DeserializeObject<List<RepairAndServices>>(jsonString);
+
+                    foreach (var item in interventions)
+                    {
+                        item.Client = await _clientRepository.GetIdAsync(item.ClientId);
+                        item.ServiceType = await _serviceTypeRepository.GetIdAsync(item.ServiceTypeId);
+                        item.Vehicle = await _vehicleRepository.GetByIdAsyncWithIncludes(item.VehicleId);
+                        item.Mechanics = await _repairAndServicesRepository.GetMechanicsByServiceIdAsync(item.Id);
+                        item.Parts = await _repairAndServicesRepository.GetPartsByServiceIdAsync(item.Id);
+                    }
+
+                    return (interventions);
+                }
+
+                return null;
+                
+            }
+        }
+
 
 
 

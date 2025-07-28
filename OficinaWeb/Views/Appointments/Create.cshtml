@@ -12,7 +12,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create" onsubmit="return validateForm()">
+        <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger" id="errors"></div>
 
 
@@ -186,57 +186,4 @@
             });
         });
     </script>
-
-    <script>
-                        function validateForm() {
-            const selectedMechanicId = parseInt(document.querySelector('[name="MechanicId"]').value);
-
-            const datePicker = document.querySelector('[name="Date"]');
-            const startDateTime = datePicker.ej2_instances[0].value;
-
-            const timePickerInstance = document.getElementById("AppointmentEnd").ej2_instances[0];
-            const endTime = timePickerInstance.value;
-
-            if (!selectedMechanicId || !startDateTime || !endTime) {
-                return true; // Deixa passar se algum campo estiver vazio
-            }
-
-            // Extrair a data (dia/mes/ano) do agendamento
-            const appointmentDate = new Date(startDateTime.getFullYear(), startDateTime.getMonth(), startDateTime.getDate());
-
-            // Extrair startTime e endTime como TimeSpan (milissegundos desde 00:00)
-            const startTimeSpan = startDateTime.getHours() * 60 + startDateTime.getMinutes();
-            const endTimeSpan = endTime.getHours() * 60 + endTime.getMinutes();
-
-            for (let i = 0; i < appointments.length; i++) {
-                const appt = appointments[i];
-
-                if (appt.mechanicId !== selectedMechanicId) continue;
-
-                const apptStartDate = new Date(appt.date);
-                const apptDateOnly = new Date(apptStartDate.getFullYear(), apptStartDate.getMonth(), apptStartDate.getDate());
-
-                // Só compara se o dia for igual
-                if (appointmentDate.getTime() !== apptDateOnly.getTime()) continue;
-
-                // Extrair start e end como TimeSpan (minutos desde meia-noite)
-                const apptStartTime = apptStartDate.getHours() * 60 + apptStartDate.getMinutes();
-
-                const endParts = appt.appointmentEnd.split(':');
-                const apptEndTime = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
-
-                const overlaps = (startTimeSpan < apptEndTime) && (endTimeSpan > apptStartTime);
-
-                if (overlaps) {
-                    const msg = `O mecânico já possui um agendamento em ${apptStartDate.toLocaleDateString()} das ${apptStartTime.toString().padStart(4, '0')} às ${apptEndTime.toString().padStart(4, '0')}.`;
-                    document.getElementById("errors").innerHTML = `<div class="text-danger">${msg}</div>`;
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    </script>
-
-
 }

@@ -21,6 +21,7 @@ namespace OficinaWeb.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly IMechanicRepository _mechanicRepository;
         private readonly ICommunicationHelper _communicationHelper;
+        private readonly ICheckAppointmentHelper _checkAppointmentHelper;
         private readonly IVehicleRepository _vehicleRepository;
        
 
@@ -30,6 +31,7 @@ namespace OficinaWeb.Controllers
             IConverterHelper converterHelper,
             IMechanicRepository mechanicRepository,
             ICommunicationHelper communicationHelper,
+            ICheckAppointmentHelper checkAppointmentHelper,
             IVehicleRepository vehicleRepository)
         {
             _appointmentsRepository = appointmentsRepository;
@@ -37,6 +39,7 @@ namespace OficinaWeb.Controllers
             _converterHelper = converterHelper;
             _mechanicRepository = mechanicRepository;
             _communicationHelper = communicationHelper;
+            _checkAppointmentHelper = checkAppointmentHelper;
             _vehicleRepository = vehicleRepository;
 
         }
@@ -138,6 +141,21 @@ namespace OficinaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
+                bool hasConflict = await _checkAppointmentHelper.CheckScheduleConflictAsync(model.MechanicId, model.Date, model.AppointmentEnd);
+
+                if (hasConflict)
+                {
+                    ModelState.AddModelError(string.Empty, "The selected time slot conflicts with the mechanic’s schedule.");
+
+                    
+                    model.MechanicsList = _mechanicRepository.GetComboProducts();
+                    model.Clients = await _clientRepository.GetAll().ToListAsync();
+                    model.Appointments = _appointmentsRepository.GetAll().ToList();
+
+                    return View(model);
+                }
+
+
                 var appointment = _converterHelper.ToAppointment(model, true);
                 await _appointmentsRepository.CreateAsync(appointment);
 
@@ -212,6 +230,20 @@ namespace OficinaWeb.Controllers
 
             var appointment = _converterHelper.ToAppointment(model, false);
 
+            var hasConflict = await _checkAppointmentHelper.CheckScheduleConflictAsync(
+                   model.MechanicId,
+                   model.Date,
+                   model.AppointmentEnd,
+                   model.Id
+               );
+
+            if (hasConflict)
+            {
+                ModelState.AddModelError(string.Empty, "The selected time slot conflicts with the mechanic’s schedule.");
+            }
+
+
+
             if (ModelState.IsValid)
             {
                 try
@@ -231,6 +263,7 @@ namespace OficinaWeb.Controllers
                         throw;
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -399,10 +432,6 @@ namespace OficinaWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
           
-
-
-
-
 
         public IActionResult AppointmentNotFound()
         {

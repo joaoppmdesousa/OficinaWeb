@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace OficinaWeb.Models
 {
@@ -6,6 +7,12 @@ namespace OficinaWeb.Models
     {
         [Required]
         public string Name { get; set; }
+
+
+        [Display(Name = "Profile picture")]
+        public IFormFile? ImageFile { get; set; }  
+
+        public string? ImageUrl { get; set; }
 
 
     }

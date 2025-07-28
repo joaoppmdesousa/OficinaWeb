@@ -3,17 +3,38 @@ using MimeKit;
 using System;
 using MailKit;
 using MailKit.Net.Smtp;
+using OficinaWeb.Data;
+using System.Linq;
 
 namespace OficinaWeb.Helpers
 {
     public class EmailHelper : IEmailHelper
     {
         private readonly IConfiguration _configuration;
+        private readonly IClientRepository _clientRepository;
+        private readonly IMechanicRepository _mechanicRepository;
 
-        public EmailHelper(IConfiguration configuration)
+        public EmailHelper(IConfiguration configuration, IClientRepository clientRepository, IMechanicRepository mechanicRepository)
         {
             _configuration = configuration;
+            _clientRepository = clientRepository;
+            _mechanicRepository = mechanicRepository;
         }
+
+
+        public bool CheckEmailExists(string email, int id, bool isClient)
+        {
+            
+            var existsInClients = _clientRepository.GetAll().Any(c => c.Email == email && (!isClient || c.Id != id));
+
+            
+            var existsInMechanics = _mechanicRepository.GetAll().Any(m => m.Email == email && (isClient || m.Id != id));
+
+            
+
+            return existsInClients || existsInMechanics;
+        }
+
 
         public Response SendEmail(string to, string subject, string body)
         {

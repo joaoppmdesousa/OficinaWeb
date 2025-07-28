@@ -26,19 +26,22 @@ namespace OficinaWeb.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly IConfiguration _configuration;
         private readonly IClientRepository _clientRepository;
+        private readonly ICloudinaryHelper _cloudinaryHelper;
 
         public AccountController(
             IUserHelper userHelper,
             IEmailHelper emailHelper,
             IConverterHelper converterHelper,
             IConfiguration configuration,
-            IClientRepository clientRepository)
+            IClientRepository clientRepository,
+            ICloudinaryHelper cloudinaryHelper)
         {
             _userHelper = userHelper;
             _emailHelper = emailHelper;
             _converterHelper = converterHelper;
             _configuration = configuration;
             _clientRepository = clientRepository;
+            _cloudinaryHelper = cloudinaryHelper;
         }
 
 
@@ -173,43 +176,55 @@ namespace OficinaWeb.Controllers
 
 
 
-        public async Task<IActionResult> ChangeUser()
-        {
-            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
-            var model = new ChangeUserViewModel();
-            if (user != null)
-            {
-                model.Name = user.Name;
-            }
-
-            return View(model);
-        }
-
-
-        [HttpPost]
-        public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
-        {
-            if (ModelState.IsValid)
+            public async Task<IActionResult> ChangeUser()
             {
                 var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+                var model = new ChangeUserViewModel();
                 if (user != null)
                 {
-                    user.Name = model.Name;
-                    var response = await _userHelper.UpdateUserAsync(user);
-                    if (response.Succeeded)
-                    {
-                        ViewBag.UserMessage = "User updated successfully.";
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description);
-                    }
-
+                    model.Name = user.Name;
+                    model.ImageUrl = user.ImageUrl;
                 }
-            }
-            return View(model);
 
-        }
+                return View(model);
+            }
+
+
+            [HttpPost]
+            public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
+            {
+                if (ModelState.IsValid)
+                {
+
+
+                    var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+                    if (user != null)
+                    {
+                        if (model.ImageFile != null && model.ImageFile.Length > 0)
+                        {
+                            var url = await _cloudinaryHelper.UploadImageAsync(model.ImageFile);
+                            user.ImageUrl = url;
+                        }
+
+
+                        user.Name = model.Name;
+                        var response = await _userHelper.UpdateUserAsync(user);
+                        if (response.Succeeded)
+                        {
+                            ViewBag.UserMessage = "User updated successfully.";
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description);
+                        }
+
+                    }
+                }
+
+
+                return View(model);
+
+            }
 
 
         public IActionResult ChangePassword()
@@ -256,15 +271,15 @@ namespace OficinaWeb.Controllers
                 if (user != null)
                 {
 
-                    if (await _userHelper.IsUserInRoleAsync(user, "Client"))
-                    {
+                    //if (await _userHelper.IsUserInRoleAsync(user, "Client"))
+                    //{
 
-                        bool isDefaultPassword = await _userHelper.CheckPasswordAsync(user, "defaultpassclient");
-                        if (isDefaultPassword)
-                        {
-                            return BadRequest("You must set your password before logging in.");
-                        }
-                    }
+                    //    bool isDefaultPassword = await _userHelper.CheckPasswordAsync(user, "defaultpassclient");
+                    //    if (isDefaultPassword)
+                    //    {
+                    //        return BadRequest("You must set your password before logging in.");
+                    //    }
+                    //}
 
                     var result = await _userHelper.ValidatePasswordAsync(
                         user,
