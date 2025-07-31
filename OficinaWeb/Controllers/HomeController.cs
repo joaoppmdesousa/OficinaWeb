@@ -30,6 +30,12 @@ namespace OficinaWeb.Controllers
 
         public IActionResult Index()
         {
+
+            if (User.Identity.IsAuthenticated && User.IsInRole("Employee"))
+            {
+                return RedirectToAction("Dashboard");
+            }
+
             return View();
         }
 

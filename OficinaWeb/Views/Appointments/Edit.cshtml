@@ -28,12 +28,10 @@
 
             <div class="form-group">
                 <label asp-for="Date" class="control-label"></label>
-                <ejs-datetimepicker id="Date"
-                                    format="dd-MM-yyyy HH:mm"
-                                    value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")"
-                                    asp-for="Date"
-                                    class="form-control">
-                </ejs-datetimepicker>
+                <input asp-for="Date"
+                       type="datetime-local"
+                       class="form-control"
+                       value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")" />
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
 

@@ -9,70 +9,96 @@
 <p>
     <a asp-action="Create" class="btn btn-outline-success"> New Service</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ServiceTypeId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Mechanics)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Details)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Client)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Vehicle)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BeginDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ServicePrice)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ServiceType.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MechanicsNames)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Details)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Client.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Vehicle.VehicleDescription)
-            </td>
-            <td>
-                @item.BeginDate.ToString("dd/MM/yyyy HH:mm")
-            </td>
-            <td>
-                @item.EndDate.ToString("dd/MM/yyyy HH:mm")
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ServicePrice)
-            </td>
-            <td>
-                    <a asp-controller="Parts" asp-route-serviceId="@item.Id" class="btn btn-outline-primary">Add Parts</a>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">Invoice</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
-            </td>
-        </tr>
+
+<br />
+
+<div class="table-container">
+    <table class="table" id="MyTable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.ServiceTypeId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Mechanics)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Details)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Client)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Vehicle)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.BeginDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.EndDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ServicePrice)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ServiceType.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MechanicsNames)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Details)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Client.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Vehicle.VehicleDescription)
+                </td>
+                <td>
+                    @item.BeginDate.ToString("dd/MM/yyyy HH:mm")
+                </td>
+                <td>
+                    @item.EndDate.ToString("dd/MM/yyyy HH:mm")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ServicePrice)
+                </td>
+                <td>
+                        <a asp-controller="Parts" asp-route-serviceId="@item.Id" class="btn btn-outline-primary">Add Parts</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">Invoice</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
+</div>
+
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable({
+                paging: true,
+                searching: true,
+                info: false,
+                lengthChange: false,
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search appointments..."
+                },
+                dom: 'ftip'
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

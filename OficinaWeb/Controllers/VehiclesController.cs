@@ -123,10 +123,20 @@ namespace OficinaWeb.Controllers
 
             if (ModelState.IsValid)
             {             
-                var vehicle = _converterHelper.ToVehicle(model, true);
-                await _vehicleRepository.CreateAsync(vehicle);
-                return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
+                if (await _vehicleRepository.CheckLicenseExists(model.LicensePlate, null))
+                {
+                    ModelState.AddModelError(("LicensePlate"), "License plate already exists.");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var vehicle = _converterHelper.ToVehicle(model, true);
+                    await _vehicleRepository.CreateAsync(vehicle);
+                    return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
+                }
             }
+
+            model.FuelTypes = new SelectList(new[] { "Gasoline", "Diesel", "Electric", "Hybrid" });
 
             model.CarBrands = await _carBrandRepository.GetAll().ToListAsync();
 
@@ -156,7 +166,7 @@ namespace OficinaWeb.Controllers
 
             model.CarBrands = await _carBrandRepository.GetAll().ToListAsync();
 
-            ViewData["Brands"] = new SelectList(model.CarBrands, "Id", "Name", model.CarBrand);
+            //ViewData["Brands"] = new SelectList(model.CarBrands, "Id", "Name", model.CarBrand);
 
             var models = await _carModelRepository.GetAll()
              .Where(m => m.CarBrandId == model.CarBrandId)
@@ -181,27 +191,41 @@ namespace OficinaWeb.Controllers
 
             if (ModelState.IsValid)
             {
-                var vehicle = _converterHelper.ToVehicle(model, false);
 
-                try
-                {              
-
-                    await _vehicleRepository.UpdateAsync(vehicle);
-
-                }
-                catch (DbUpdateConcurrencyException)
+                if (await _vehicleRepository.CheckLicenseExists(model.LicensePlate, model.Id))
                 {
-                    if (!await _vehicleRepository.ExistsAsync(vehicle.Id))
-                    {
-                        return new NotFoundViewResult("VehicleNotFound");
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError(("LicensePlate"), "License plate already exists.");
                 }
-                return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
+
+                if (ModelState.IsValid)
+                {
+
+                    var vehicle = _converterHelper.ToVehicle(model, false);
+
+                    try
+                    {
+
+                        await _vehicleRepository.UpdateAsync(vehicle);
+
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!await _vehicleRepository.ExistsAsync(vehicle.Id))
+                        {
+                            return new NotFoundViewResult("VehicleNotFound");
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return RedirectToAction(nameof(Index), new { clientId = vehicle.ClientId });
+
+                }
+              
             }
+
+            model.FuelTypes = new SelectList(new[] { "Gasoline", "Diesel", "Electric", "Hybrid" });
 
             model.CarBrands = await _carBrandRepository.GetAll().ToListAsync();
 
@@ -317,6 +341,8 @@ namespace OficinaWeb.Controllers
         {
             return View();
         }
+
+
 
     }
 }

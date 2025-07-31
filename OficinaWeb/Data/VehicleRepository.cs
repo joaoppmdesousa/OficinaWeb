@@ -33,5 +33,13 @@ namespace OficinaWeb.Data
         }
 
 
+        public async Task<bool> CheckLicenseExists(string newLicensePlate, int? excludeVehicleId)
+        {
+            return await _context.Vehicles
+                .AnyAsync(v => v.LicensePlate == newLicensePlate &&
+                              (!excludeVehicleId.HasValue || v.Id != excludeVehicleId.Value));
+        }
+
+
     }
 }

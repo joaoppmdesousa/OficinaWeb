@@ -9,63 +9,86 @@
 <p>
     <a asp-action="Create" class="btn btn-outline-success">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MechanicSpecialty)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProfessionalContact)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ClockIn)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ClockOut)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Active)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-             <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MechanicSpecialty.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProfessionalContact)
-            </td>
-            <td>
-                    @($"{item.ClockIn.Hours:D2}:{item.ClockIn.Minutes:D2}")
-            </td>
-            <td>
-                    @($"{item.ClockOut.Hours:D2}:{item.ClockOut.Minutes:D2}")
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Active)
-            </td>
-            <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
-            </td>
-        </tr>
+<br />
+
+<div class="table-container">
+    <table class="table" id="MyTable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Email)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.MechanicSpecialty)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ProfessionalContact)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ClockIn)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ClockOut)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Active)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                 <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MechanicSpecialty.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProfessionalContact)
+                </td>
+                <td>
+                        @($"{item.ClockIn.Hours:D2}:{item.ClockIn.Minutes:D2}")
+                </td>
+                <td>
+                        @($"{item.ClockOut.Hours:D2}:{item.ClockOut.Minutes:D2}")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Active)
+                </td>
+                <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable({
+                paging: true,
+                searching: true,
+                info: false,
+                lengthChange: false,
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search appointments..."
+                },
+                dom: 'ftip'
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

@@ -21,6 +21,7 @@ namespace OficinaWeb.Controllers
         private readonly IAppointmentsRepository _appointmentsRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly IEmailHelper _emailHelper;
+        private readonly IRepairAndServicesRepository _repairAndServicesRepository;
         private readonly IUserHelper _userHelper;
 
         public MechanicsController(
@@ -29,6 +30,7 @@ namespace OficinaWeb.Controllers
             IAppointmentsRepository appointmentsRepository,
             IConverterHelper converterHelper,
             IEmailHelper emailHelper,
+            IRepairAndServicesRepository repairAndServicesRepository,
             IUserHelper userHelper)
         {
             _context = context;
@@ -36,6 +38,7 @@ namespace OficinaWeb.Controllers
             _appointmentsRepository = appointmentsRepository;
             _converterHelper = converterHelper;
             _emailHelper = emailHelper;
+            _repairAndServicesRepository = repairAndServicesRepository;
             _userHelper = userHelper;
         }
 
@@ -94,7 +97,8 @@ namespace OficinaWeb.Controllers
 
 
                 await _mechanicRepository.CreateAsync(mechanic);
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction("CreateUserForMechanic", "Account", new { mechanicId = mechanic.Id});
             }
 
             ViewData["MechanicSpecialtyId"] = new SelectList(_context.Specialties, "Id", "Name");
@@ -196,30 +200,25 @@ namespace OficinaWeb.Controllers
             var hasAppointments = _appointmentsRepository.GetAll()
                           .Any(a => a.MechanicId == id);
 
-            if (hasAppointments)
+            var hasService = _repairAndServicesRepository.GetAll()
+                          .Any(s => s.Mechanics.Any(m => m.Id == id));
+
+            if (hasAppointments || hasService)
             {
-                TempData["Error"] = "Cannot delete this mechanic because they are assigned to existing appointments.";
+                TempData["Error"] = "Cannot delete this mechanic because they are assigned to existing appointments and/or services.";
                 return RedirectToAction(nameof(Delete));
             }
 
-            await _mechanicRepository.DeleteAsync(mechanic);
+                await _mechanicRepository.DeleteAsync(mechanic);
+            User user = await _userHelper.GetUserByEmailAsync(mechanic.Email);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userHelper.DeleteUserAsync(user);
             return RedirectToAction(nameof(Index));
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> SearchMechanics(string search)
-        {
-            var mechanics = await _mechanicRepository.GetAll()
-                .Where(m => string.IsNullOrEmpty(search) || m.Name.Contains(search))
-                .Select(m => new
-                {
-                    id = m.Id,
-                    name = m.Name,
-                })
-                .ToListAsync();
-
-            return Json(mechanics);
         }
 
 
@@ -231,13 +230,20 @@ namespace OficinaWeb.Controllers
                                                         .Include(a => a.Vehicle)
                                                             .ThenInclude(v => v.CarBrand)
                                                         .Include(a => a.Vehicle)
-                                                            .ThenInclude(v => v.CarModel);
+                                                            .ThenInclude(v => v.CarModel)
+                                                        .Include(a => a.Client)
+                                                        .Include(a => a.Mechanic);
+                                                        
+
+
 
             var appointmentsViewModel = new List<ScheduleViewModel>();
             var mechanics =  _mechanicRepository.GetAll().Include(m => m.MechanicSpecialty);
             var isMechanic = mechanics.Any(m => m.Email == User.Identity.Name);
+            var isClient = User.IsInRole("Client");
             var IsEmployee = User.IsInRole("Employee");
             var mechanic = mechanics.FirstOrDefault(m => m.Email == User.Identity.Name);
+            var email = isClient ? User.Identity.Name : "0";
 
             foreach (Appointment appointment in appointmentsAux)
             {
@@ -245,14 +251,15 @@ namespace OficinaWeb.Controllers
                 {
                     if(appointment.MechanicId == mechanic?.Id)
                     {
-                        var viewModel = _converterHelper.ToScheduleViewModel(appointment, IsEmployee);
+                        var viewModel = _converterHelper.ToScheduleViewModel(appointment, IsEmployee, isClient, email);
                         appointmentsViewModel.Add(viewModel);
                     }
                     
                 }
                 else
                 {               
-                    var viewModel = _converterHelper.ToScheduleViewModel(appointment, IsEmployee);
+                    
+                    var viewModel = _converterHelper.ToScheduleViewModel(appointment, IsEmployee, isClient, email);
                     appointmentsViewModel.Add(viewModel);
                 }
 
@@ -284,12 +291,29 @@ namespace OficinaWeb.Controllers
 
 
 
-            ViewBag.Mechanics = mechanics;
+            ViewBag.Mechanics = mechanics.Where(m => m.Active == true);
             ViewBag.IsMechanic = isMechanic;
+
 
 
             return View(appointmentsViewModel);
 
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> SearchMechanics(string search)
+        {
+            var mechanics = await _mechanicRepository.GetAll()
+                .Where(m => string.IsNullOrEmpty(search) || m.Name.Contains(search))
+                .Select(m => new
+                {
+                    id = m.Id,
+                    name = m.Name,
+                })
+                .ToListAsync();
+
+            return Json(mechanics);
         }
 
 

@@ -44,6 +44,7 @@ namespace OficinaWeb.Helpers
 
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string password);
 
+        Task<IdentityResult> DeleteUserAsync(User user);
 
     }
 }

@@ -93,7 +93,7 @@ namespace OficinaWeb.Helpers
         }
 
 
-        public ScheduleViewModel ToScheduleViewModel(Appointment appointment, bool isEmployee)
+        public ScheduleViewModel ToScheduleViewModel(Appointment appointment, bool isEmployee, bool isClient, string currentUserEmail)
         {
 
             if (isEmployee)
@@ -104,7 +104,20 @@ namespace OficinaWeb.Helpers
                     Id = appointment.Id,
                     Subject = $"{appointment.AppointmentType}, {appointment.Vehicle.VehicleDescription} ",
                     StartTime = appointment.Date,
-                    EndTime = appointment.Date.Date + appointment.AppointmentEnd
+                    EndTime = appointment.Date.Date + appointment.AppointmentEnd,
+ 
+
+                };
+            }
+
+            if (isClient && appointment.Client?.Email == currentUserEmail)
+            {
+                return new ScheduleViewModel
+                {
+                    Id = appointment.Id,
+                    Subject = $"My appointment: \n {appointment.AppointmentType}, \n {appointment.Mechanic.Name}, \n {appointment.Vehicle.VehicleDescription}",
+                    StartTime = appointment.Date,
+                    EndTime = appointment.Date.Date + appointment.AppointmentEnd,
 
                 };
             }
@@ -116,7 +129,8 @@ namespace OficinaWeb.Helpers
                     Id = appointment.Id,
                     Subject = "Unavailable",
                     StartTime = appointment.Date,
-                    EndTime = appointment.Date.Date + appointment.AppointmentEnd
+                    EndTime = appointment.Date.Date + appointment.AppointmentEnd,
+  
 
                 };
             }

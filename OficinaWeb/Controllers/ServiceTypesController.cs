@@ -13,15 +13,17 @@ namespace OficinaWeb.Controllers
 {
     public class ServiceTypesController : Controller
     {
-        private readonly DataContext _context;
+
         private readonly IServiceTypeRepository _serviceTypeRepository;
+        private readonly IRepairAndServicesRepository _repairAndServicesRepository;
 
         public ServiceTypesController(
-            DataContext context,
-            IServiceTypeRepository serviceTypeRepository)
+            IServiceTypeRepository serviceTypeRepository,
+            IRepairAndServicesRepository repairAndServicesRepository)
         {
-            _context = context;
+
             _serviceTypeRepository = serviceTypeRepository;
+            _repairAndServicesRepository = repairAndServicesRepository;
         }
 
         // GET: ServiceTypes
@@ -125,6 +127,17 @@ namespace OficinaWeb.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var serviceType = await _serviceTypeRepository.GetIdAsync(id);
+
+            var hasService = _repairAndServicesRepository.GetAll()
+                         .Any(s => s.ServiceTypeId == id);
+
+            if (hasService)
+            {
+                TempData["Error"] = "Cannot delete this service type because they are assigned to existing services.";
+                return RedirectToAction(nameof(Delete));
+            }
+
+
             await _serviceTypeRepository.DeleteAsync(serviceType);
             return RedirectToAction(nameof(Index));
         }

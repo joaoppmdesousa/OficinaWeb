@@ -12,5 +12,6 @@ namespace OficinaWeb.Data
 
         public Task<Vehicle> GetByIdAsyncWithIncludes(int id);
 
+        public Task<bool> CheckLicenseExists(string newLicensePlate, int? excludeVehicleId);
     }
 }

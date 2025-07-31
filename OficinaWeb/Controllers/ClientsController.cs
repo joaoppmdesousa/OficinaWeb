@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using OficinaWeb.Data;
 using OficinaWeb.Data.Entities;
 using OficinaWeb.Helpers;
+using OficinaWeb.Migrations;
 using OficinaWeb.Models;
 
 namespace OficinaWeb.Controllers
@@ -19,18 +20,21 @@ namespace OficinaWeb.Controllers
         private readonly IClientRepository _clientRepository;
         private readonly IUserHelper _userHelper;
         private readonly IEmailHelper _emailHelper;
-        private readonly DataContext _context;
+        private readonly IAppointmentsRepository _appointmentsRepository;
+        private readonly IRepairAndServicesRepository _repairAndServicesRepository;
 
         public ClientsController(
             IClientRepository clientRepository,
             IUserHelper userHelper,
             IEmailHelper emailHelper,
-            DataContext context)
+            IAppointmentsRepository appointmentsRepository,
+            IRepairAndServicesRepository repairAndServicesRepository)
         {
             _clientRepository = clientRepository;
             _userHelper = userHelper;
             _emailHelper = emailHelper;
-            _context = context;
+            _appointmentsRepository = appointmentsRepository;
+            _repairAndServicesRepository = repairAndServicesRepository;
         }
 
         [Authorize(Roles = "Employee")]
@@ -204,11 +208,32 @@ namespace OficinaWeb.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var client = await _clientRepository.GetIdAsync(id);
+
+
+            var hasAppointments = _appointmentsRepository.GetAll()
+                          .Any(a => a.ClientId == id);
+            var hasService = _repairAndServicesRepository.GetAll()
+                          .Any(s => s.ClientId == id);
+
+            if (hasAppointments || hasService)
+            {
+                TempData["Error"] = "Cannot delete this client because they are assigned to existing appointments and/or services.";
+                return RedirectToAction(nameof(Delete));
+            }
+
             await _clientRepository.DeleteAsync(client);
+
+
+            User user = await _userHelper.GetUserByEmailAsync(client.Email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userHelper.DeleteUserAsync(user);
+
             return RedirectToAction(nameof(Index));
         }
-
-
 
 
         [Authorize(Roles = "Employee")]
@@ -227,6 +252,7 @@ namespace OficinaWeb.Controllers
 
             return Json(clients);
         }
+
 
         public IActionResult ClientNotFound()
         {

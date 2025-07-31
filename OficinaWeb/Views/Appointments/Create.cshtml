@@ -4,7 +4,6 @@
     ViewData["Title"] = "Create";
 }
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css" />
 
 <h1>Create</h1>
 
@@ -30,12 +29,10 @@
 
             <div class="form-group">
                 <label asp-for="Date" class="control-label"></label>
-                <ejs-datetimepicker id="Date"
-                                    format="dd-MM-yyyy HH:mm"
-                                    value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")"
-                                    asp-for="Date"
-                                    class="form-control">
-                </ejs-datetimepicker>
+                <input asp-for="Date"
+                       class="form-control"
+                       type="datetime-local"
+                       value="@DateTime.Now" />
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
 
@@ -64,14 +61,15 @@
             </div>
             
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+   
 </div>
 
 
@@ -86,6 +84,7 @@
             </div>
             <div class="modal-body">              
                 <div class="panel-body">
+                    <div class="table-container">
                     <table class="table table-hover table-responsive table-striped" id="MyTable">
                         <thead>
                             <tr>
@@ -124,6 +123,7 @@
                             
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -131,24 +131,23 @@
 </div>
 
 
-@using Newtonsoft.Json
-@using OficinaWeb.Data.Entities
-<script>
-    const appointments = @Html.Raw(JsonConvert.SerializeObject(Model.Appointments ?? new List<Appointment>()));
-</script>
 
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+
 
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#MyTable').DataTable();           
+             $('#MyTable').DataTable({
+                paging: true,
+                searching: true,
+                info: false,
+                lengthChange: false,
+            });
 
             $(".select-client").click(function () {
                 var clientId = $(this).data("id");

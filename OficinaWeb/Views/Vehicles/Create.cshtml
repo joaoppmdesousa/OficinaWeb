@@ -51,11 +51,15 @@
                 <input asp-for="Mileage" class="form-control" />
                 <span asp-validation-for="Mileage" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="FuelType" class="control-label"></label>
-                <input asp-for="FuelType" class="form-control" />
+                <select asp-for="FuelType" class="form-control" asp-items="Model.FuelTypes">
+                    <option value="">-- Select a fuel type --</option>
+                </select>
                 <span asp-validation-for="FuelType" class="text-danger"></span>
             </div>
+
             <div>
                 <input type="hidden" asp-for="ClientId" />
             </div>

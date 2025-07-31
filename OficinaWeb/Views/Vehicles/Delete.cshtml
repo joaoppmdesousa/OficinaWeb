@@ -61,3 +61,12 @@
         <a href="@ViewBag.ReturnUrl" class="btn btn-outline-primary">Back to List</a>    
     </form>
 </div>
+
+<br />
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}

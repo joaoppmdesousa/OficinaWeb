@@ -1,9 +1,13 @@
-﻿ Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. 
-
+﻿
+/*
+ * Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+ * for details on configuring this project to bundle and minify static web assets.
+ */
 body {
     font-family: 'Poppins', sans-serif;
 }
+
+
 
 .navbar {
     background-color: #9370DB !important;
@@ -25,9 +29,10 @@ body {
 }
 
 .navbar-brand {
-    font-family: 'Bebas Neue', cursive;
-    font-size: 1.8rem;
+    font-family: 'SPEED';
+    font-size: 2rem;
     font-weight: 900;
+    letter-spacing: 1.5px;
     color: #4B0082 !important;
     white-space: normal;
     text-align: center;
@@ -75,13 +80,105 @@ body {
     border-color: #1861ac;
 }
 
- Sticky footer 
+Sticky footer
 .footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    white-space: nowrap;
-    line-height: 60px;
+    background-color: #9370DB;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/
+
+.footer {
+    flex-shrink: 0;
+    background-color: #9370DB;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+
+.content-wrapper {
+    flex: 1 0 auto;
+    margin-left: 60px;
+    margin-right: 60px;
+}
+
+
+.table-container {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-bottom: 30px;
+}
+
+    /* Apply to any table inside the container */
+    .table-container table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+        /* Purple header */
+        .table-container table thead {
+            background-color: #9370DB;
+            color: white;
+        }
+
+
+
+/* Row hover effect */
+.dataTable tbody tr:hover {
+    background-color: #f2e6ff;
+}
+
+/* DataTable Search Input */
+div.dataTables_filter .form-control.form-control-sm {
+    width: 250px; 
+    padding: 15px 15px;
+
+    border: 1px solid #9370DB;
+    border-radius: 6px;
+    margin-left: 8px;
+    box-sizing: border-box; 
+}
+
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: #9370DB !important;
+        color: white !important;
+    }
+
+/* Remove DataTables bottom border */
+table.dataTable.no-footer {
+    border-bottom: groove;
+}
+
+.dataTables_filter {
+    float: none !important;
+    text-align: left !important;
+    margin-bottom: 10px;
+}
+
+@font-face {
+    font-family: 'SPEED';
+    src: url('../fonts/SPEED.otf') format('truetype');
+    font-weight: bold; 
+    font-style: italic;
+    font-display: swap;
 }
 
 
@@ -91,36 +188,29 @@ body {
 
 
 
+/* 404 error page */
+--------------------------------------------------
 
+.error404-container {
+    background-color: #001f3f;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding: 3rem 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 
+.error404-container h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+}
 
-
-     404 error page
--------------------------------------------------- 
-
-    .error404-container {
-        background-color: #001f3f;
-        color: white;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        text-align: center;
-        padding: 3rem 1rem;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-        .error404-container h1 {
-            font-size: 3rem;
-            margin-bottom: 2rem;
-        }
-
-        .error404-container svg {
-            max-width: 80vw;
-            height: auto;
-            margin-top: 2rem;
-        }
-
-
-
+.error404-container svg {
+    max-width: 80vw;
+    height: auto;
+    margin-top: 2rem;
+}

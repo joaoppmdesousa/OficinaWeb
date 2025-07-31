@@ -16,11 +16,14 @@ namespace OficinaWeb.Controllers
     public class MechanicSpecialtiesController : Controller
     {
         private readonly ISpecialtiesRepository _specialtiesRepository;
+        private readonly IMechanicRepository _mechanicRepository;
 
         public MechanicSpecialtiesController(
-            ISpecialtiesRepository specialtiesRepository)
+            ISpecialtiesRepository specialtiesRepository,
+            IMechanicRepository mechanicRepository)
         {
             _specialtiesRepository = specialtiesRepository;
+            _mechanicRepository = mechanicRepository;
         }
 
         // GET: MechanicSpecialties
@@ -125,6 +128,18 @@ namespace OficinaWeb.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var mechanicSpecialty = await _specialtiesRepository.GetIdAsync(id);
+
+
+            var hasMechanic = _mechanicRepository.GetAll()
+                         .Any(m => m.MechanicSpecialtyId == id);
+
+            if (hasMechanic)
+            {
+                TempData["Error"] = "Cannot delete this specialty because they are assigned to 1 or more mechanics.";
+                return RedirectToAction(nameof(Delete));
+            }
+
+
             await _specialtiesRepository.DeleteAsync(mechanicSpecialty);
             return RedirectToAction(nameof(Index));
         }

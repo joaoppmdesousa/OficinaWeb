@@ -1,5 +1,6 @@
 ﻿using OficinaWeb.Data;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -40,17 +41,13 @@ namespace OficinaWeb.Helpers
                a.Date.Date == StartTimeAndDate.Date &&
                newStart < a.AppointmentEnd &&
                a.Date.TimeOfDay < newEnd
-   );
+                );
 
 
 
             return hasConflict;
 
-        }
-
-
-
-
+        }    
 
 
 

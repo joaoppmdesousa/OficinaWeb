@@ -16,12 +16,14 @@ namespace OficinaWeb.Controllers
         private readonly DataContext _context;
         private readonly ICarModelRepository _carModelRepository;
         private readonly ICarBrandRepository _carBrandRepository;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public CarModelsController(DataContext context, ICarModelRepository carModelRepository, ICarBrandRepository carBrandRepository)
+        public CarModelsController(DataContext context, ICarModelRepository carModelRepository, ICarBrandRepository carBrandRepository, IVehicleRepository vehicleRepository)
         {
             _context = context;
             _carModelRepository = carModelRepository;
             _carBrandRepository = carBrandRepository;
+            _vehicleRepository = vehicleRepository;
         }
 
         // GET: CarModels
@@ -146,6 +148,17 @@ namespace OficinaWeb.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var carModel = await _carModelRepository.GetIdAsync(id);
+
+            var hasVehicle = _vehicleRepository.GetAll()
+                        .Any(v => v.CarModelId == id);
+
+            if (hasVehicle)
+            {
+                TempData["Error"] = "Cannot delete this model because it's assigned to 1 or more vehicle.";
+                return RedirectToAction(nameof(Delete));
+            }
+
+
             await _carModelRepository.DeleteAsync(carModel);
 
             return RedirectToAction("Index", new { brandId = carModel.CarBrandId });

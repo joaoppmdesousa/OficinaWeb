@@ -18,8 +18,12 @@
 
 
             <div class="mb-3">
-                <label class="form-label">Profile picture</label>
-                <input asp-for="ImageFile" type="file" class="form-control" />
+                <label class="form-label" for="ImageFile">Profile picture</label>
+
+                <div class="input-group">
+                    <input type="file" class="form-control" id="ImageFile" name="ImageFile" aria-label="Upload">
+                </div>
+
                 <span asp-validation-for="ImageFile" class="text-warning"></span>
             </div>
 

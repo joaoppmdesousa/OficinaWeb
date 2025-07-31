@@ -28,7 +28,10 @@ else
               readonly="true"
               popupOpen="onPopupOpen">
 
-    <e-schedule-eventsettings dataSource="Model"></e-schedule-eventsettings>
+
+    <e-schedule-eventsettings dataSource="Model">
+        <e-eventsettings-fields color="Color"></e-eventsettings-fields>
+    </e-schedule-eventsettings>
     <e-schedule-views>
         <e-schedule-view option="WorkWeek"></e-schedule-view>
         <e-schedule-view option="Month"></e-schedule-view>
@@ -38,6 +41,7 @@ else
 
 @if (!ViewBag.IsMechanic)
 {
+
     <br />
 
     <div class="alert alert-info text-center p-4 shadow-sm rounded">

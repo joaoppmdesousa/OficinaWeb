@@ -129,5 +129,16 @@ namespace OficinaWeb.Helpers
         {
             return await _userManager.ResetPasswordAsync(user, token, password);
         }
+
+        public async Task<IdentityResult> DeleteUserAsync(User user)
+        {
+           
+            if (user != null)
+            {
+                return await _userManager.DeleteAsync(user);
+            }
+
+            return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+        }
     }
 }

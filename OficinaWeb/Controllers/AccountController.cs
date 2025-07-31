@@ -26,6 +26,7 @@ namespace OficinaWeb.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly IConfiguration _configuration;
         private readonly IClientRepository _clientRepository;
+        private readonly IMechanicRepository _mechanicRepository;
         private readonly ICloudinaryHelper _cloudinaryHelper;
 
         public AccountController(
@@ -34,6 +35,7 @@ namespace OficinaWeb.Controllers
             IConverterHelper converterHelper,
             IConfiguration configuration,
             IClientRepository clientRepository,
+            IMechanicRepository mechanicRepository,
             ICloudinaryHelper cloudinaryHelper)
         {
             _userHelper = userHelper;
@@ -41,7 +43,17 @@ namespace OficinaWeb.Controllers
             _converterHelper = converterHelper;
             _configuration = configuration;
             _clientRepository = clientRepository;
+            _mechanicRepository = mechanicRepository;
             _cloudinaryHelper = cloudinaryHelper;
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Users()
+        {
+            var users = _userHelper.GetAllUsers();
+
+            return View(users);
+
         }
 
 
@@ -180,6 +192,9 @@ namespace OficinaWeb.Controllers
             {
                 var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
                 var model = new ChangeUserViewModel();
+
+
+
                 if (user != null)
                 {
                     model.Name = user.Name;
@@ -193,9 +208,18 @@ namespace OficinaWeb.Controllers
             [HttpPost]
             public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
             {
-                if (ModelState.IsValid)
+                if (model.ImageFile != null)
                 {
+                    if (model.ImageFile.Length > 2 * 1024 * 1024) 
+                    {
+                        ModelState.AddModelError("ImageFile", "The image size must be less than 2 MB.");
+                    }
+                }
 
+
+            if (ModelState.IsValid)
+                {
+                    
 
                     var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
                     if (user != null)
@@ -534,6 +558,72 @@ namespace OficinaWeb.Controllers
             return RedirectToAction("AdminClientList", "Clients"); ;
         }
 
+
+
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateUserForMechanic(int mechanicId)
+        {
+            var mechanic = await _mechanicRepository.GetIdAsync(mechanicId);
+            if (mechanic == null) return NotAuthorized();
+
+            var existingUser = await _userHelper.GetUserByEmailAsync(mechanic.Email);
+            if (existingUser != null)
+            {
+                //TempData["Error"] = "There is already a mechanic with that email";
+                //return RedirectToAction("Home", "Index");
+
+                return NotAuthorized();
+            }
+
+            var user = new User
+            {
+                Name = mechanic.Name,
+                Email = mechanic.Email,
+                UserName = mechanic.Email,
+            };
+
+            var result = await _userHelper.AddUserAsync(user, "defaultpassclient");
+
+            if (result.Succeeded)
+            {
+                await _userHelper.AddUserToRoleAsync(user, "Employee");
+
+                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+
+                var model = _converterHelper.ToRegisterNewUserViewModel(user, "Mechanic");
+
+                string tokenLink = Url.Action("SetPassword", "Account", new
+                {
+                    userId = user.Id,
+                    token = myToken
+                }, protocol: HttpContext.Request.Scheme);
+
+                Response response = _emailHelper.SendEmail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+                    $"To allow the user, " +
+                    $"you will need to set your password,please click in this link:</br></br><a href = \"{tokenLink}\">Set Password</a>");
+
+
+                if (!response.IsSuccess)
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to send confirmation email.");
+                }
+
+                if (response.IsSuccess)
+                {
+                    TempData["Message"] = "The instructions to confirm your account have been sent to the email provided.";
+                    return RedirectToAction("RegisterConfirmation");
+                }
+
+            }
+            else
+            {
+                TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+
+            return RedirectToAction("MechanicsController", "Index");
+        }
 
 
         public IActionResult NotAuthorized()

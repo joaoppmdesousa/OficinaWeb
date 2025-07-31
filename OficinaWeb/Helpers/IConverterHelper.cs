@@ -19,7 +19,7 @@ namespace OficinaWeb.Helpers
 
         VehicleViewModel ToVehicleViewModel(Vehicle vehicle);
 
-        ScheduleViewModel ToScheduleViewModel(Appointment appointmentbool, bool isEmployee);
+        ScheduleViewModel ToScheduleViewModel(Appointment appointment, bool isEmployee, bool isClient, string currentUserEmail);
 
         RepairAndServices ToRepairAndServices(RepairAndServicesViewModel model, bool isNew);
 

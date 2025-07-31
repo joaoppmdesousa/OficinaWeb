@@ -5,36 +5,55 @@
 
 <h1>My Vehicles</h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().LicensePlate)</th>
-            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().CarBrandId)</th>
-            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().CarModelId)</th>
-            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Year)</th>
-            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Mileage)</th>
-            <th>@Html.DisplayNameFor(model => model.MyVehicles.First().FuelType)</th>
-            <th>Contact</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.MyVehicles)
-        {
+<div class="table-container">
+    <table class="table" id="MyTable">
+        <thead>
             <tr>
-                <td>@item.LicensePlate</td>
-                <td>@item.CarBrand.Name</td>
-                <td>@item.CarModel.Name</td>
-                <td>@item.Year</td>
-                <td>@item.Mileage</td>
-                <td>@item.FuelType</td>
-                <td>
-                    <a asp-controller="RepairAndServices" asp-action="MyServices" asp-route-id="@item.Id" asp-route-vehicleId="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")" class="btn btn-outline-info">Services</a>
-                    <a asp-action="Edit" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")"  class="btn btn-outline-secondary">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")" class="btn btn-outline-secondary">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")"  class="btn btn-outline-danger">Delete</a>
-                </td>
+                <th>@Html.DisplayNameFor(model => model.MyVehicles.First().LicensePlate)</th>
+                <th>@Html.DisplayNameFor(model => model.MyVehicles.First().CarBrandId)</th>
+                <th>@Html.DisplayNameFor(model => model.MyVehicles.First().CarModelId)</th>
+                <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Year)</th>
+                <th>@Html.DisplayNameFor(model => model.MyVehicles.First().Mileage)</th>
+                <th>@Html.DisplayNameFor(model => model.MyVehicles.First().FuelType)</th>                
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.MyVehicles)
+            {
+                <tr>
+                    <td>@item.LicensePlate</td>
+                    <td>@item.CarBrand.Name</td>
+                    <td>@item.CarModel.Name</td>
+                    <td>@item.Year</td>
+                    <td>@item.Mileage</td>
+                    <td>@item.FuelType</td>
+                    <td>
+                        <a asp-controller="RepairAndServices" asp-action="MyServices" asp-route-id="@item.Id" asp-route-vehicleId="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")" class="btn btn-outline-info">Services</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")"  class="btn btn-outline-secondary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")" class="btn btn-outline-secondary">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("MyVehicles", "Vehicles")"  class="btn btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable({
+                paging: true,
+                searching: true,
+                info: false,
+                lengthChange: false,
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search vehicles..."
+                },
+                dom: 'ftip'
+            });
+        });
+    </script>
+}

@@ -86,6 +86,7 @@ namespace OficinaWeb.Controllers
         public IActionResult Create()
         {
             var model = new RepairAndServicesViewModel();
+            
 
             var serviceTypes = _serviceTypeRepository.GetAll().ToList();
             model.ServiceTypes = new SelectList(serviceTypes, "Id","Name");
@@ -102,6 +103,21 @@ namespace OficinaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(RepairAndServicesViewModel model)
         {
+            if (model.EndDate < DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(model.EndDate), "End date cannot be in the past.");
+            }
+
+            if (model.EndDate <= model.BeginDate)
+            {
+                ModelState.AddModelError(nameof(model.EndDate), "End date must be after the begin date.");
+            }
+
+            if (model.BeginDate < DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(model.BeginDate), "Begin date cannot be in the past.");
+            }
+
 
             if (ModelState.IsValid)
             {
@@ -160,13 +176,28 @@ namespace OficinaWeb.Controllers
         public async Task<IActionResult> Edit(int id, RepairAndServices repairAndServices)
         {
 
-            Console.WriteLine(System.Globalization.CultureInfo.CurrentCulture);
+           
 
             if (id != repairAndServices.Id)
             {
                 return new NotFoundViewResult("ServiceNotFound");
             }
-          
+
+            if (repairAndServices.EndDate < DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(repairAndServices.EndDate), "End date cannot be in the past.");
+            }
+
+            if (repairAndServices.EndDate <= repairAndServices.BeginDate)
+            {
+                ModelState.AddModelError(nameof(repairAndServices.EndDate), "End date must be after the begin date.");
+            }
+
+            if (repairAndServices.BeginDate < DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(repairAndServices.BeginDate), "Begin date cannot be in the past.");
+            }
+
 
             if (ModelState.IsValid)
             {

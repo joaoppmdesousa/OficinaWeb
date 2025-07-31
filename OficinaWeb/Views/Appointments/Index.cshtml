@@ -10,7 +10,9 @@
     <a class="btn btn-outline-success" asp-action="Create">Make Appointment</a>
     <a class="btn btn-outline-info" asp-action="AppointmentHistory"> Appointment History</a>
 </p>
-<table class="table">
+ <br />
+<div class="table-container">
+    <table class="table" id="MyTable">
     <thead>
         <tr>
             <th>
@@ -64,3 +66,25 @@
 }
     </tbody>
 </table>
+</div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable({
+                paging: true,
+                searching: true,
+                info: false,
+                lengthChange: false,
+                ordering: false,
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search appointments..."
+                },
+                dom: 'ftip'
+            });
+        });
+    </script>
+}

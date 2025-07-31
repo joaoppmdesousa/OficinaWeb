@@ -1,156 +1,4 @@
-﻿@* <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - OficinaWeb</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/28.1.33/bootstrap5.css" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/28.1.33/dist/ej2.min.js"></script>
-
-    
-    
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">OficinaWeb</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                       
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Mechanics" asp-action="Schedule">Schedule</a>
-                        </li>
-                       
-                        <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>   
-
-                          <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Communication" asp-action="Index">Communication Panel</a>
-                        </li>  
-
-                        @if(this.User.Identity.IsAuthenticated && this.User.IsInRole("Admin"))
-						{
-							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</a>
-								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-									<li><a class="dropdown-item"  asp-area="" asp-controller="" asp-action="">Users</a></li>
-									<li><a class="dropdown-item"  asp-area="" asp-controller="" asp-action="">Roles</a></li>
-                                    <li><a class="dropdown-item"  asp-area="" asp-controller="account" asp-action="Register" >Register New User</a></li>
-                                    <li><a class="dropdown-item"  asp-area="" asp-controller="Clients" asp-action="AdminClientList" >Admin Client List</a></li>
-                                    <li><a class="dropdown-item"  asp-area="" asp-controller="MechanicSpecialties" asp-action="Index" >Mechanic Specialties</a></li>
-                                    <li><a class="dropdown-item"  asp-area="" asp-controller="CarBrands" asp-action="Index" >Brands and Models</a></li>
-                                    <li><a class="dropdown-item"  asp-area="" asp-controller="ServiceTypes" asp-action="Index" >Service Types</a></li>
-								</ul>
-							</li>
-
-						     <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Mechanics"  asp-action="Index">Mechanics</a>
-                            </li>
-                       
-                        }
-
-                         @if(this.User.Identity.IsAuthenticated && this.User.IsInRole("Employee"))
-                         {
-                             <li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Services</a>
-								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-									<li><a class="dropdown-item"  asp-area="" asp-controller="RepairAndServices" asp-action="MyServices">Completed Services</a></li>
-									<li><a class="dropdown-item"  asp-area="" asp-controller="RepairAndServices" asp-action="Index">All Services</a></li>
-                             
-								</ul>
-							</li>
-
-                             <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Clients" asp-action="Index">Clients</a>
-                            </li>                      
-
-                             <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Appointments" asp-action="Index">Appointments</a>
-                             </li>
-                              
-                        }
-
-
-
-                         @if(this.User.Identity.IsAuthenticated && this.User.IsInRole("Client"))
-                        {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Vehicles" asp-action="MyVehicles">My Vehicles</a>
-                        </li>  
-                        }                       
-                        
-                    </ul>                    
-
-
-
-
-                    <ul class="nav navbar-nav navbar-right">
-                        @if (this.User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ChangeUser">@this.User.Identity.Name</a>                                
-                            </li>
-
-                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
-                            </li>
-                        }
-
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                        }
-
-                    </ul>
-
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - OficinaWeb - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
-    <ejs-scripts></ejs-scripts>
-</body>
-</html>
-
- *@
-
-
-
-
-
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -158,25 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Sucatas Workshop</title>
 
+
+
+
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/28.1.33/bootstrap5.css" />
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/28.1.33/bootstrap5.css" />    
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 
     <!-- Bootstrap Bundle JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.syncfusion.com/ej2/28.1.33/dist/ej2.min.js"></script>
+
 </head>
 <body style="font-family: 'Poppins', sans-serif;">
     <header>
-        <nav class="navbar navbar-expand-lg" style="background-color: #9370DB;">
+        <nav class=" navbar navbar-expand-lg navbar-dark" style="background-color: #9370DB;">
             <div class="container-fluid">
-                <a class="navbar-brand" style="color: #4B0082; font-weight: 900; font-size: 1.8rem; font-family: 'Bebas Neue', cursive;" asp-area="" asp-controller="Home" asp-action="Index">
-                    Sucatas Workshop
+
+                <a class="navbar-brand" style="color: #4B0082; font-weight: 900; font-size: 1.8rem;" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span> Sucatas </span>
+                                     
+                    <span  style="font-weight: 400; font-size: 0.7rem;">   workshop </span>
+
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -190,20 +47,14 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Mechanics" asp-action="Schedule">Schedule</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Communication" asp-action="Index">Communication Panel</a>
-                        </li>
+                        
 
                         @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link text-white dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-controller="" asp-action="">Users</a></li>
-                                    <li><a class="dropdown-item" asp-controller="" asp-action="">Roles</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Users">Users</a></li>
                                     <li><a class="dropdown-item" asp-controller="Account" asp-action="Register">Register New User</a></li>
                                     <li><a class="dropdown-item" asp-controller="Clients" asp-action="AdminClientList">Admin Client List</a></li>
                                     <li><a class="dropdown-item" asp-controller="MechanicSpecialties" asp-action="Index">Mechanic Specialties</a></li>
@@ -222,7 +73,7 @@
                                 <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Services</a>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" asp-controller="RepairAndServices" asp-action="MyServices">Completed Services</a></li>
-                                    <li><a class="dropdown-item" asp-controller="RepairAndServices" asp-action="Index">All Services</a></li>
+                                    <li><a class="dropdown-item" asp-controller="RepairAndServices" asp-action="Index">On Going Services</a></li>
                                 </ul>
                             </li>
                             <li class="nav-item">
@@ -231,6 +82,10 @@
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-controller="Appointments" asp-action="Index">Appointments</a>
                             </li>
+
+                            <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Communication" asp-action="Index">Communication Panel</a>
+                             </li>
                         }
 
                         @if (User.Identity.IsAuthenticated && User.IsInRole("Client"))
@@ -263,22 +118,29 @@
         </nav>
     </header>
 
-    <div class="container my-4">
-        <main role="main" class="pb-3">
+
+    <div class="content-wrapper">
+        <main role="main" class="container-fluid my-4">
             @RenderBody()
         </main>
-    </div>
+     </div>
 
-    <footer class="footer py-3 mt-auto" style="background-color: #9370DB; color: white;">
+    <footer class="footer py-3" style="background-color: #5C4B7D; color: #FFFFFF;">
         <div class="container text-center">
-            &copy; 2025 - <span style="color: #4B0082;">Sucatas Workshop</span> -
-            <a style="color: #4B0082;" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - <span style="color: #DDA0DD;">Sucatas Workshop</span>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+
+
     @await RenderSectionAsync("Scripts", required: false)
     <ejs-scripts></ejs-scripts>
 </body>

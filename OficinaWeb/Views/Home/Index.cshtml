@@ -1,8 +1,65 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+	ViewData["Title"] = "Home Page";
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<body class="home-page-background">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="p-5 shadow rounded-4 d-flex flex-column align-items-center text-center" style="background-color: rgba(147, 112, 219, 0.7); min-height: 320px; border-radius: 15px;">
+                    <h2 style="font-family: 'SPEED';font-style: italic; color:#3A0066; font-weight: 700; font-size: 4rem; margin-bottom: 0;">
+                        Sucatas
+                    </h2>
+                    <h3 style="font-family: 'SPEED'; color:#3A0066; font-weight: 700; font-style: italic; font-size: 2.5rem; margin-top: 0;">
+                        workshop
+                    </h3>
+                    <p class="lead mt-4" style="font-family: 'Poppins', sans-serif; max-width: 400px; color: white;">
+                        Your trusted destination for professional vehicle repairs and scheduled maintenance.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5" />
+
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 shadow rounded-4" style="background-color: rgba(147, 112, 219, 0.7); border-radius: 15px;">
+                    <div class="card-body">
+                        <h5 class="card-title" style="color: white; font-weight: bold;">Comprehensive Services</h5> @* Title changed to white and bold, content updated *@
+                        <p class="card-text" style="color: white;">From routine check-ups to complex engine diagnostics, we cover all aspects of vehicle care.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow rounded-4" style="background-color: rgba(147, 112, 219, 0.7); border-radius: 15px;">
+                    <div class="card-body">
+                        <h5 class="card-title" style="color: white; font-weight: bold;">Transparent Pricing</h5> @* Title changed to white and bold, content updated *@
+                        <p class="card-text" style="color: white;">No hidden fees. We provide clear, upfront estimates and explain all work before it begins.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow rounded-4" style="background-color: rgba(147, 112, 219, 0.7); border-radius: 15px;">
+                    <div class="card-body">
+                        <h5 class="card-title" style="color: white; font-weight: bold;">Customer Satisfaction</h5> @* Title changed to white and bold, content updated *@
+                        <p class="card-text" style="color: white;">Your peace of mind is our priority. We strive for excellence in every repair and interaction.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</body>
+
+<style>
+	
+	.home-page-background {
+		background-image: url('https://res.cloudinary.com/dssaw9y4s/image/upload/v1753911383/desktop-wallpaper-aesthetic-japanese-car-90s-cars_upscayl_3x_upscayl-standard-4x_e2o4p4.png');
+		background-size:cover ;
+		background-position: center center;
+		background-repeat: no-repeat;
+	}
+	}
+</style>

@@ -45,12 +45,12 @@
            
             <div class="form-group">
                 <label asp-for="BeginDate" class="control-label"></label>
-                <input asp-for="BeginDate" class="form-control" />
+                <input asp-for="BeginDate" class="form-control" value="@DateTime.Now" />
                 <span asp-validation-for="BeginDate" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="EndDate" class="control-label"></label>
-                <input asp-for="EndDate" class="form-control" />
+                <input asp-for="EndDate" class="form-control" value="@DateTime.Now"  />
                 <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
 
@@ -230,7 +230,6 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const mechanicSearch = document.getElementById("mechanicSearch");
         const mechanicTableBody = document.getElementById("mechanicTableBody");
         const mechanicForm = document.getElementById("mechanicForm");
         const selectedMechanicsInput = document.getElementById("SelectedMechanics");
@@ -269,10 +268,9 @@
                 });
             });
 
-            // Atualiza o campo visual com nomes
+
             selectedMechanicsInput.value = selectedMechanics.map(m => m.name).join(", ");
 
-            // Limpa e recria os hidden inputs
             mechanicIdsContainer.innerHTML = "";
             selectedMechanics.forEach(m => {
                 const input = document.createElement("input");

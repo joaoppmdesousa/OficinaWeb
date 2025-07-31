@@ -10,60 +10,81 @@
     <a asp-action="Create" asp-route-clientId="@ViewBag.ClientId" class="btn btn-outline-success" >Create New</a>
     <a asp-controller="Clients" asp-action="Index" class="btn btn-outline-primary">Back to Clients</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.LicensePlate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CarBrandId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CarModelId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Year)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Mileage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FuelType)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.LicensePlate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CarBrand.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CarModel.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Year)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Mileage)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FuelType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Client.Contact)
-            </td>
-            <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })" class="btn btn-outline-secondary">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })"  class="btn btn-outline-secondary">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })" class="btn btn-outline-danger">Delete</a>
-            </td> 
-        </tr>
+<br />
+
+<div class="table-container">
+    <table class="table" id="MyTable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.LicensePlate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CarBrandId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CarModelId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Year)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Mileage)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FuelType)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LicensePlate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CarBrand.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CarModel.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Mileage)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FuelType)
+                </td>
+                <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })" class="btn btn-outline-secondary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })"  class="btn btn-outline-secondary">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" asp-route-returnUrl="@Url.Action("Index", "Vehicles", new { clientId = item.ClientId })" class="btn btn-outline-danger">Delete</a>
+                </td> 
+            </tr>
+    }
+        </tbody>
+    </table>
+</div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable({
+                paging: true,
+                searching: true,
+                info: false,
+                lengthChange: false,
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search vehicles..."
+                },
+                dom: 'ftip'
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>
